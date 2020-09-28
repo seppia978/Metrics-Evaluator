@@ -37,7 +37,7 @@ with open(data_root + 'imagenet_val_gts.txt', 'r') as f:
 
 
 img_dict=IMUT.IMG_list(path=p,GT=GT,labs=labs).generate_random(num_imgs)
-#img_dict=IMUT.IMG_list(path=p,GT=GT,labs=labs).select_idx(7995)
+#img_dict=IMUT.IMG_list(path=p,GT=GT,labs=labs).select_idx(1)
 
 print(list(img_dict.get_keys()))
 resnet=EVMET.Architecture(models.resnet18(pretrained=True).eval(),'resnet')
@@ -45,10 +45,8 @@ avg_drop=ADIC.AverageDrop('average_drop',resnet)
 inc_conf=ADIC.IncreaseInConfidence('increase_in_confidence',resnet)
 deletion=DAI.Deletion('deletion',0,resnet)
 insertion=DAI.Insertion('insertion',0,resnet)
-print(avg_drop)
 em=EVMET.MetricsEvaluator(img_dict,saliency_map_extractor=test.run,metrics=[avg_drop,inc_conf,deletion,insertion])
 print(EVMET.list_metrics(em))
-print(avg_drop.help())
 em.evaluate_metrics()
 
 

@@ -10,11 +10,12 @@ class AverageDrop(EVMET.MetricOnAllDataset):
         super().__init__(name,result)
         self.arch=arch
         if torch.cuda.is_available():
-            self.arch.get_arch().cuda()
+            self.arch.set_arch(self.arch.get_arch().cuda())
 
     def update(self,inp,out,saliency_map):
         Y_i_c,class_idx=out.max(1)[0].item(),out.max(1)[-1].item()
-        print(next(self.arch.get_arch().parameters()).is_cuda)
+        if torch.cuda.is_available():
+            inp = inp.cuda()
         out_sal = FF.softmax(self.arch.get_arch()(inp * saliency_map), dim=1)
         O_i_c = out_sal[:, class_idx][0].item()
         self.result += (max(0.0, Y_i_c - O_i_c) / Y_i_c)
@@ -27,10 +28,12 @@ class IncreaseInConfidence(EVMET.MetricOnAllDataset):
         super().__init__(name,result)
         self.arch=arch
         if torch.cuda.is_available():
-            self.arch.get_arch().cuda()
+            self.arch.set_arch(self.arch.get_arch().cuda())
 
     def update(self,inp,out,saliency_map):
         Y_i_c,class_idx=out.max(1)[0].item(),out.max(1)[-1].item()
+        if torch.cuda.is_available():
+            inp = inp.cuda()
         out_sal = FF.softmax(self.arch.get_arch()(inp * saliency_map), dim=1)
         O_i_c = out_sal[:, class_idx][0].item()
         self.result += one(O_i_c, Y_i_c)

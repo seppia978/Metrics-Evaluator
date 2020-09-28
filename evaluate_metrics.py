@@ -74,6 +74,8 @@ class MetricOnSingleExample(Metric):
 
     def get_result(self):
         return self.result
+    def get_res_list(self):
+        return self.res_list
 
 
 class MetricOnAllDataset(Metric):
@@ -92,11 +94,13 @@ class MetricOnAllDataset(Metric):
 class MetricsEvaluator:
 
     # LIST OF METRICS AVAILABLE
-    available_metrics=['average_drop','increase_in_confidence','deletion','inesrtion']
+    available_metrics=[]
 
     # CONSTRUCTOR
     def __init__(self,img_dict, saliency_map_extractor=None, model='resnet',metrics=[],times=1):
         self.img_dict,self.saliency_map_extractor,self.model,self.metrics,self.times=img_dict, saliency_map_extractor, model,[m for m in metrics],times
+        for x in self.metrics:
+            self.available_metrics.append(x.get_name())
 
     # UTILS
     def __list_metrics__(self):
@@ -203,6 +207,7 @@ class MetricsEvaluator:
                         m.update(inp,out,saliency_map)
                         m.final_step()
                         print(f'The final {m.get_name()} score is {m.get_result()}')
+                        #print(m.get_res_list())
                         Y.append(m.get_res_list())
                         L.append((m.get_name(),m.get_result()))
                         m.clear()

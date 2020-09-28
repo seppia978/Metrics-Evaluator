@@ -12,7 +12,7 @@ class Deletion(EVMET.MetricOnSingleExample):
         super().__init__(name,result,[])
         self.arch,self.st=arch,st
         if torch.cuda.is_available():
-            self.arch.get_arch().cuda()
+            self.arch.set_arch(self.arch.get_arch().cuda())
 
     def get_res_list(self):
         return self.res_list
@@ -26,6 +26,8 @@ class Deletion(EVMET.MetricOnSingleExample):
         class_idx = out.max(1)[-1].item()
         while not exp_map.norm() == 0:
             inp, exp_map = remove_more_important_px(inp, exp_map, step=self.st)
+            if torch.cuda.is_available():
+                inp = inp.cuda()
             out = FF.softmax(self.arch.get_arch()(inp), dim=1)
             Y_i_c = out[:, class_idx][0].item()
             self.res_list.append(Y_i_c)
@@ -39,7 +41,7 @@ class Insertion(EVMET.MetricOnSingleExample):
         super().__init__(name,result,[])
         self.arch,self.st=arch,st
         if torch.cuda.is_available():
-            self.arch.get_arch().cuda()
+            self.arch.set_arch(self.arch.get_arch().cuda())
             
     def get_res_list(self):
         return self.res_list
@@ -48,7 +50,7 @@ class Insertion(EVMET.MetricOnSingleExample):
         img, out, em = args
         exp_map = em.clone()
         # print(exp_map.min())
-        inp = img.clone()
+        inp = trans(torch.zeros(img.squeeze(0).shape))
         # plt.figure()
         # plt.imshow(img.cpu().squeeze(0).detach().permute(1,2,0).numpy())
         # plt.savefig('out/')
@@ -57,6 +59,8 @@ class Insertion(EVMET.MetricOnSingleExample):
         while not exp_map.norm() == 0:
             # print(exp_map.norm(),(inp-img).norm())
             inp, exp_map = insert_more_important_px(img, inp, exp_map, step=self.st)
+            if torch.cuda.is_available():
+                inp=inp.cuda()
             out = FF.softmax(self.arch.get_arch()(inp), dim=1)
             Y_i_c = out[:, class_idx][0].item()
             self.res_list.append(Y_i_c)
@@ -92,7 +96,7 @@ def insert_more_important_px(img,inp,exp_map,step=0.01):
     max_iter = int((inp.shape[2] * inp.shape[3] * step))
     #print(max_iter)
     im=inp.clone()
-    if (inp-im).norm()==0:
+    if not exp_map.norm()==0:
         for iii in range(max_iter):
             argmax = exp_map.argmax()
             i = argmax // exp_map.shape[1]
