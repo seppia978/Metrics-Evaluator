@@ -3,7 +3,7 @@ import torch.nn.functional as FF
 import torchvision.models as models
 
 import os
-import time
+
 from utils import *
 
 
@@ -164,8 +164,7 @@ class MetricsEvaluator:
         if torch.cuda.is_available():
             arch = arch.cuda()
         precision = 100
-        start = time.time()
-        now = start
+
 
         if metrics is not []:
             for _ in range(times):
@@ -181,18 +180,18 @@ class MetricsEvaluator:
                     if torch.cuda.is_available():
                         inp = inp.cuda()
                     #print(f'Before test.run: {round(time.time() - now, 0)}s')
-                    now = time.time()
+
                     out, saliency_map = self.get_explanation_map(img=img_dict.get_path() + '/' + img)
                     F.to_pil_image(saliency_map.squeeze(0)).save(f'{outpath}/exp_map.png')
                     #print(f'After test.run: {round(time.time() - now, 0)}s')
-                    now = time.time()
+
                     if torch.cuda.is_available():
                         saliency_map = saliency_map.cuda()
                     #print(f'Before arch: {round(time.time() - now, 0)}s')
-                    now = time.time()
+
                     out_sal = FF.softmax(arch(inp * saliency_map), dim=1)
                     #print(f'After arch: {round(time.time() - now, 0)}s')
-                    now = time.time()
+
                     # print(type(out_sal),out_sal.shape)
                     Y_i_c = out.max(1)[0].item()
                     class_idx = out.max(1)[-1].item()
@@ -218,13 +217,10 @@ class MetricsEvaluator:
                     for M in M_res:
                         M.update(inp,out,saliency_map)
 
-                    print(f'After one img: {int(time.time() - now)}s')
-                    now = time.time()
+                    #print(f'After one img: {int(time.time() - now)}s')
+                    #now = time.time()
 
-                print(f'In {num_imgs} images')
-                for M in M_res:
-                    M.final_step(num_imgs)
-                    print(f'The final {M.get_name()} drop is: {round(M.get_result(), 2)}%')
-                    M.clear()
+        return M_res,m_res
 
-            print(f'Execution time: {int(time.time() - start)}s')
+
+

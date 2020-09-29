@@ -66,6 +66,12 @@ class IMG_list:
     def add_img(self,idx,img):
         self.img_dict[idx]=img
 
+    def select_imgs(self, id):
+        i,l=list(id.keys()),list(id.values())
+        images_list=[im for im in l]
+        img_dict = {k: v for k, v in zip(i, images_list)}
+        self.img_dict=img_dict
+        return self
     def select_idx(self,images_id):
         if type(images_id) is not list:
             try:

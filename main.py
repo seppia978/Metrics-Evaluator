@@ -4,20 +4,44 @@ import metrics.average_drop_and_increase_of_confidence as ADIC
 import metrics.deletion_and_insertion as DAI
 import torchvision.models as models
 import test
+import sys
+import time
+import json
 
-num_imgs = 1
+def get_name_images(s):
+    return str(s)[-13:-5]
+
+def get_num_img(s):
+    return int(s[-13:-5])
+def get_n_imgs(l,pattern):
+    ret=[]
+    for i in range(len(l)):
+        s = ''.join(map(str, ['0' for _ in range(13 - 5 - len(str(l[i])))]))+str(l[i])
+        p=pattern.replace('********', s)
+        ret.append(p)
+    return {k: v for k, v in zip(range(l[0],l[-1]+1), ret)}
+
+#------ MAIN -------#
+i=0
+chunk_id=-1
+chunk_dim=0
+params=[]
+for arg in sys.argv[1:]:
+    if not(i%2==0):
+        params.append(arg)
+    i+=1
+
+chunk_id,chunk_dim=[int(x) for x in params]
+num_imgs = chunk_dim
+print(num_imgs)
 p = ''
 root = './'  # '/tirocinio_tesi/Score-CAM000/Score-CAM'
 outpath_root = root + 'out/'
 data_root = root + 'ILSVRC2012_devkit_t12/data/'
 
-def get_name_images(s):
-    return str(s)[-13:-5]
-
-#------ MAIN -------#
 with open(data_root + 'IMAGENET_path.txt', 'r') as f:
     p = f.read().strip()
-
+p+='/'
 labs_w = []
 with open(data_root + 'labels.txt', 'r') as f:
     labs_w = [x[9:] for x in f.read().strip().split('\n')]
@@ -36,19 +60,33 @@ with open(data_root + 'imagenet_val_gts.txt', 'r') as f:
     GT = {get_name_images(x.split()[0]): [get_name_images(x.split()[0]) + ' ' + x.split()[2]] for x in f.read().strip().split('\n')}
 
 
-img_dict=IMUT.IMG_list(path=p,GT=GT,labs=labs).generate_random(num_imgs)
-#img_dict=IMUT.IMG_list(path=p,GT=GT,labs=labs).select_idx(1)
+#img_dict=IMUT.IMG_list(path=p,GT=GT,labs=labs).generate_random(num_imgs)
+base,window=chunk_id*chunk_dim,chunk_dim
+pattern='ILSVRC2012_val_********.JPEG'
+img_list=get_n_imgs(range(base+1,base+window+1),pattern)
+img_dict=IMUT.IMG_list(path=p,GT=GT,labs=labs).select_imgs(img_list)
+print(img_dict.get_img_dict())
 
-print(list(img_dict.get_keys()))
 resnet=EVMET.Architecture(models.resnet18(pretrained=True).eval(),'resnet')
+
 avg_drop=ADIC.AverageDrop('average_drop',resnet)
 inc_conf=ADIC.IncreaseInConfidence('increase_in_confidence',resnet)
 deletion=DAI.Deletion('deletion',0,resnet)
 insertion=DAI.Insertion('insertion',0,resnet)
+
 em=EVMET.MetricsEvaluator(img_dict,saliency_map_extractor=test.run,metrics=[avg_drop,inc_conf,deletion,insertion])
-print(EVMET.list_metrics(em))
-em.evaluate_metrics()
 
+start = time.time()
+now = start
+M_res,_=em.evaluate_metrics()
+print(f'Execution time: {int(time.time() - start)}s')
+print(f'In {num_imgs} images')
+for M in M_res:
+    M.final_step(num_imgs)
+    print(f'The final {M.get_name()} is: {round(M.get_result(), 2)}%')
 
-
-
+f=open(f'{outpath_root}output.txt','a')
+output={f'metricsonalldataset{chunk_id}.txt':[m.get_result() for m in M_res]}
+json.dump(output,f)
+f.write('\n')
+(M.clear() for M in M_res)
