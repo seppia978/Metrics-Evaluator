@@ -174,7 +174,10 @@ class MetricsEvaluator:
                     print(f'image {i}')
                     outpath=img_dict.get_outpath_root()+f'{k}_{img}/'
                     inp_0=load_image(img_dict.get_path() + '/' + img)
-                    os.mkdir(outpath)
+                    try:
+                        os.mkdir(outpath+'ex')
+                    except:
+                        pass
                     inp_0.save(f'{outpath}{img}')
                     inp = apply_transforms(inp_0)
                     if torch.cuda.is_available():
@@ -189,7 +192,7 @@ class MetricsEvaluator:
                         saliency_map = saliency_map.cuda()
                     #print(f'Before arch: {round(time.time() - now, 0)}s')
 
-                    out_sal = FF.softmax(arch(inp * saliency_map), dim=1)
+                    #out_sal = FF.softmax(arch(inp * saliency_map), dim=1)
                     #print(f'After arch: {round(time.time() - now, 0)}s')
 
                     # print(type(out_sal),out_sal.shape)
@@ -197,7 +200,7 @@ class MetricsEvaluator:
                     class_idx = out.max(1)[-1].item()
                     class_name=labs[str(class_idx)]
                     gt_name=GT[str(img[-13:-5])][0].split()[1]
-                    O_i_c = out_sal[:, class_idx][0].item()
+                    #O_i_c = out_sal[:, class_idx][0].item()
 
                     # PLOTS AND UPDATES
                     Y=[]
