@@ -80,13 +80,17 @@ def remove_more_important_px(img,exp_map,step=0.01):
 
         argmax = exp_map.view(1, -1).topk(max_iter)[1]
         zero = trans(torch.zeros(3).unsqueeze(1).unsqueeze(1)).cuda()
-        im1=img.view(-1,1,3).clone()
+        zero=zero.repeat(1,1,1,max_iter)
+        #im1=img.view(-1,1,3).clone()
         #print(zero)
         #print(argmax)
+
+        i = argmax // exp_map.shape[1]
+        j = argmax % exp_map.shape[1]
+        img[:, :, i, j]=zero.view(img[:, :, i, j].shape)
         for idx in argmax[0]:
-            im1[idx]=zero.view(1,3)
             exp_map.view(-1,1)[idx]=0
-        img=im1.view(img.shape).clone()
+        #img=im1.view(img.shape).clone()
         #for idx in argmax[0]:
         #    print(denormalize(img.view(-1,1,3)[idx]))
         '''
@@ -118,18 +122,22 @@ def insert_more_important_px(img,inp,exp_map,step=0.01):
     max_iter = int((inp.shape[2] * inp.shape[3] * step))
     #print(max_iter)
     im=inp.clone()
+    if torch.cuda.is_available():
+        im=im.cuda()
     if not exp_map.norm()==0:
         argmax = exp_map.view(1, -1).topk(max_iter)[1]
-        img1,im1 = img.view(-1, 1, 3),img.view(-1, 1, 3)
+        #img1,im1 = img.view(-1, 1, 3),im.view(-1, 1, 3)
+        i = argmax // exp_map.shape[1]
+        j = argmax % exp_map.shape[1]
+        im[:, :, i, j] = img[:, :, i, j]
         for idx in argmax[0]:
-            print(img1[idx])
-            im1[idx]=img1[idx]
+            #im1[idx]=img1[idx]
             exp_map.view(-1,1)[idx]=0
 
-        plt.figure()
-        plt.imshow(denormalize(im1.view(im.shape)).cpu().squeeze(0).detach().permute(1, 2, 0).numpy())
-        plt.savefig(f'out/fig{time.time()}111.png')
-        im=im1.view(im.shape)
+        #plt.figure()
+        #plt.imshow(denormalize(im1.view(im.shape)).cpu().squeeze(0).detach().permute(1, 2, 0).numpy())
+        #plt.savefig(f'out/fig{time.time()}111.png')
+        #im=im1.view(im.shape)
         '''
         for iii in range(max_iter):
             argmax = exp_map.argmax()
@@ -145,7 +153,7 @@ def insert_more_important_px(img,inp,exp_map,step=0.01):
             #    plt.imshow(im.cpu().squeeze(0).detach().permute(1, 2, 0).numpy())
             #    plt.savefig(f'out/{exp_map.norm()}.png')
         '''
-        plt.figure()
-        plt.imshow(denormalize(im).squeeze(0).cpu().detach().permute(1,2,0).numpy())
-        plt.savefig(f'out/fig{time.time()}222.png')
+        #plt.figure()
+        #plt.imshow(denormalize(im).squeeze(0).cpu().detach().permute(1,2,0).numpy())
+        #plt.savefig(f'out/fig{time.time()}222.png')
         return im,exp_map
