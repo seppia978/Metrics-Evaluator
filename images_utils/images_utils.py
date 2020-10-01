@@ -14,6 +14,15 @@ def trans(img):
 
   return tensor
 
+def denormalize(tensor):
+    denormalized = tensor.clone()
+    means = [0.485, 0.456, 0.406]
+    stds = [0.229, 0.224, 0.225]
+    for channel, mean, std in zip(denormalized[0], means, stds):
+        channel.mul_(std).add_(mean)
+
+    return denormalized
+
 class IMG_list:
     def __init__(self,path=None,outpath_root='out/',img_dict=None,GT=None,labs=None):
         if type(GT) is not dict and GT is not None:

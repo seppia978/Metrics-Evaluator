@@ -4,8 +4,9 @@ import torch
 import torch.nn.functional as FF
 import evaluate_metrics as EVMET
 from sklearn import metrics as SKM
-from images_utils.images_utils import trans
-
+from images_utils.images_utils import *
+import matplotlib.pyplot as plt
+import time
 
 class Deletion(EVMET.MetricOnSingleExample):
     def __init__(self,name,result,arch,st=0.01):
@@ -51,9 +52,7 @@ class Insertion(EVMET.MetricOnSingleExample):
         exp_map = em.clone()
         # print(exp_map.min())
         inp = self.arch.apply_transform(torch.zeros(img.squeeze(0).shape))
-        # plt.figure()
-        # plt.imshow(img.cpu().squeeze(0).detach().permute(1,2,0).numpy())
-        # plt.savefig('out/')
+
         class_idx = out.max(1)[-1].item()
         # print(img.mean(),inp.norm())
         while not exp_map.norm() == 0:
@@ -76,9 +75,27 @@ def remove_more_important_px(img,exp_map,step=0.01):
     exp_map=exp_map.squeeze(0).squeeze(0)
     max_iter=int((img.shape[2]*img.shape[3]*step))
     if not img.norm() == 0:
+        #print(max_iter)
+        #print(exp_map.view(1,-1).topk(max_iter)[1])
+
+        argmax = exp_map.view(1, -1).topk(max_iter)[1]
+        zero = trans(torch.zeros(3).unsqueeze(1).unsqueeze(1)).cuda()
+        im1=img.view(-1,1,3).clone()
+        #print(zero)
+        #print(argmax)
+        for idx in argmax[0]:
+            im1[idx]=zero.view(1,3)
+            exp_map.view(-1,1)[idx]=0
+        img=im1.view(img.shape).clone()
+        #for idx in argmax[0]:
+        #    print(denormalize(img.view(-1,1,3)[idx]))
+        '''
+        
+        print(img.view(1,-1,3).shape)
         for _ in range(max_iter):
             #print(max_iter)
             argmax=exp_map.argmax()
+            #print(argmax in exp_map.view(1,-1).topk(max_iter)[1])
             i = argmax // exp_map.shape[1]
             j = argmax % exp_map.shape[1]
             zero=trans(torch.zeros(3).unsqueeze(1).unsqueeze(1)).cuda()
@@ -88,7 +105,12 @@ def remove_more_important_px(img,exp_map,step=0.01):
 
             #if (iii+1) % 1000 == 0:
             #    print(iii,max_iter)
-
+        '''
+        #print(denormalize(zero), denormalize(img).min(), denormalize(img).max())
+        #plt.figure()
+        #plt.imshow(denormalize(img).squeeze(0).cpu().detach().permute(1,2,0).numpy())
+        #plt.show()
+        #plt.savefig(f'out/fig{time.time()}.png')
         return img,exp_map
 
 def insert_more_important_px(img,inp,exp_map,step=0.01):
@@ -97,6 +119,18 @@ def insert_more_important_px(img,inp,exp_map,step=0.01):
     #print(max_iter)
     im=inp.clone()
     if not exp_map.norm()==0:
+        argmax = exp_map.view(1, -1).topk(max_iter)[1]
+        img1,im1 = img.view(-1, 1, 3),img.view(-1, 1, 3)
+        for idx in argmax[0]:
+            print(img1[idx])
+            im1[idx]=img1[idx]
+            exp_map.view(-1,1)[idx]=0
+
+        plt.figure()
+        plt.imshow(denormalize(im1.view(im.shape)).cpu().squeeze(0).detach().permute(1, 2, 0).numpy())
+        plt.savefig(f'out/fig{time.time()}111.png')
+        im=im1.view(im.shape)
+        '''
         for iii in range(max_iter):
             argmax = exp_map.argmax()
             i = argmax // exp_map.shape[1]
@@ -110,4 +144,8 @@ def insert_more_important_px(img,inp,exp_map,step=0.01):
             #    plt.figure()
             #    plt.imshow(im.cpu().squeeze(0).detach().permute(1, 2, 0).numpy())
             #    plt.savefig(f'out/{exp_map.norm()}.png')
+        '''
+        plt.figure()
+        plt.imshow(denormalize(im).squeeze(0).cpu().detach().permute(1,2,0).numpy())
+        plt.savefig(f'out/fig{time.time()}222.png')
         return im,exp_map
