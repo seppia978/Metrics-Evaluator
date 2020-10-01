@@ -50,7 +50,7 @@ class Insertion(EVMET.MetricOnSingleExample):
         img, out, em = args
         exp_map = em.clone()
         # print(exp_map.min())
-        inp = trans(torch.zeros(img.squeeze(0).shape))
+        inp = self.arch.apply_transform(torch.zeros(img.squeeze(0).shape))
         # plt.figure()
         # plt.imshow(img.cpu().squeeze(0).detach().permute(1,2,0).numpy())
         # plt.savefig('out/')

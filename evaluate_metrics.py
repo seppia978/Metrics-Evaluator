@@ -13,18 +13,59 @@ def list_metrics(em):
     return em.__list_metrics__()
 
 class Architecture:
-    def __init__(self,arch, name):
-        self.arch,self.name=arch,name
+    def __init__(self,arch, name,T=None,DeT=None,means=[0.485, 0.456, 0.406],stds=[0.229, 0.224, 0.225]):
+        self.arch,self.name,self.T,self.DeT,self.means,self.stds=arch,name,T,DeT,means,stds
 
     def get_name(self):
         return self.name
     def get_arch(self):
         return self.arch
+    def get_custom_transformation(self):
+        return self.T
+    def get_custom_detransformation(self):
+        return self.DeT
+    def get_means(self):
+        return self.means
+    def get_stds(self):
+        return self.stds
 
     def set_name(self,name):
         self.name=name
     def set_arch(self,arch):
         self.arch=arch
+    def set_custom_transformation(self,T):
+        self.T=T
+    def set_custom_detransformation(self,DeT):
+        self.DeT=DeT
+    def set_means(self,m):
+        self.means=m
+    def set_stds(self,s):
+        self.stds=s
+
+    def apply_transform(self,image,size=224):
+        if not isinstance(image, Image.Image):
+            image = F.to_pil_image(image)
+
+        transform = transforms.Compose([
+            transforms.Resize(size),
+            transforms.CenterCrop(size),
+            transforms.ToTensor(),
+            transforms.Normalize(self.means, self.stds)
+        ])
+
+        tensor = transform(image).unsqueeze(0)
+
+        tensor.requires_grad = True
+
+        return tensor
+
+    def detransform(self, tensor):
+        denormalized = tensor.clone()
+
+        for channel, mean, std in zip(denormalized[0], self.means, self.stds):
+            channel.mul_(std).add_(mean)
+
+        return denormalized
 
 class Metric:
 
@@ -155,14 +196,14 @@ class MetricsEvaluator:
         labs=img_dict.get_labels()
         num_imgs = len(img_dict)
         if model == 'resnet':
-            arch = models.resnet18(pretrained=True).eval()
+            arch_obj = Architecture(models.resnet18(pretrained=True).eval(),model)
         elif model == 'vgg':
-            arch = models.vgg16(pretrained=True).eval()
+            arch_obj = Architecture(models.vgg16(pretrained=True).eval(),model)
         elif model == 'alexnet':
-            arch = models.alexnet(pretrained=True).eval()
+            arch_obj = Architecture(models.alexnet(pretrained=True).eval(),model)
 
         if torch.cuda.is_available():
-            arch = arch.cuda()
+            arch = arch_obj.get_arch().cuda()
         precision = 100
 
 
@@ -175,11 +216,11 @@ class MetricsEvaluator:
                     outpath=img_dict.get_outpath_root()+f'{k}_{img}/'
                     inp_0=load_image(img_dict.get_path() + '/' + img)
                     try:
-                        os.mkdir(outpath+'ex')
+                        os.mkdir(outpath)
                     except:
                         pass
                     inp_0.save(f'{outpath}{img}')
-                    inp = apply_transforms(inp_0)
+                    inp = arch_obj.apply_transform(inp_0)
                     if torch.cuda.is_available():
                         inp = inp.cuda()
                     #print(f'Before test.run: {round(time.time() - now, 0)}s')
