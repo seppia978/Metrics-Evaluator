@@ -28,7 +28,7 @@ def run(i=0,arch='resnet',path='out/', img=None):
       name='alex'+str(i)+'.png'
       outpath+=name
       #basic_visualize(input_.cpu(), scorecam_map.type(torch.FloatTensor).cpu(),save_path=outpath)
-    elif arch == 'vgg':
+    elif arch == 'vgg16':
       # vgg
       vgg = models.vgg16(pretrained=True).eval()
       vgg_model_dict = dict(type='vgg16', arch=vgg, layer_name='features_29',input_size=(224, 224))

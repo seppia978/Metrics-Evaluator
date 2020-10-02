@@ -109,8 +109,10 @@ class MetricOnSingleExample(Metric):
         self.result,self.res_list=result,res_list
 
     # UTILS
-    def clear(self):
+    def clear_list(self):
         self.res_list = []
+
+    def clear(self):
         self.result = 0
 
     def get_result(self):
@@ -197,7 +199,7 @@ class MetricsEvaluator:
         num_imgs = len(img_dict)
         if model == 'resnet':
             arch_obj = Architecture(models.resnet18(pretrained=True).eval(),model)
-        elif model == 'vgg':
+        elif model == 'vgg16':
             arch_obj = Architecture(models.vgg16(pretrained=True).eval(),model)
         elif model == 'alexnet':
             arch_obj = Architecture(models.alexnet(pretrained=True).eval(),model)
@@ -253,7 +255,7 @@ class MetricsEvaluator:
                         #print(m.get_res_list())
                         Y.append(m.get_res_list())
                         L.append((m.get_name(),m.get_result()))
-                        m.clear()
+                        m.clear_list()
                     plot(torch.arange(0, 1, 1 / precision), Y,
                          label=L,
                          path=f'{outpath}plot_{k}.png',

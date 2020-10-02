@@ -66,8 +66,8 @@ class Insertion(EVMET.MetricOnSingleExample):
 
     def final_step(self,**kwargs):
         self.res_list=self.res_list[-int(1/self.st):]
-        self.result=round(SKM.auc(torch.arange(0, 1, self.st).numpy(),
-                      torch.tensor(self.res_list).numpy()), 3)
+        self.result=SKM.auc(torch.arange(0, 1, self.st).numpy(),
+                      torch.tensor(self.res_list).numpy())
 
 
 
