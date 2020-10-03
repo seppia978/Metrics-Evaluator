@@ -213,6 +213,8 @@ class MetricsEvaluator:
             for _ in range(times):
                 m_res=[m for m in metrics if m.is_all_dataset() is not True]
                 M_res = [m for m in metrics if m.is_all_dataset()]
+
+                # For each image
                 for i, (k,img) in enumerate(img_dict.get_items()):
                     print(f'image {i}')
                     outpath=img_dict.get_outpath_root()+f'{k}_{img}/'
@@ -222,15 +224,16 @@ class MetricsEvaluator:
                     except:
                         pass
                     inp_0.save(f'{outpath}{img}')
+
+                    # Apply transformation
                     inp = arch_obj.apply_transform(inp_0)
                     if torch.cuda.is_available():
                         inp = inp.cuda()
                     #print(f'Before test.run: {round(time.time() - now, 0)}s')
-
                     out, saliency_map = self.get_explanation_map(img=img_dict.get_path() + '/' + img)
+                    out,saliency_map=out.detach(),saliency_map.detach()
                     F.to_pil_image(saliency_map.squeeze(0)).save(f'{outpath}/exp_map.png')
                     #print(f'After test.run: {round(time.time() - now, 0)}s')
-
                     if torch.cuda.is_available():
                         saliency_map = saliency_map.cuda()
                     #print(f'Before arch: {round(time.time() - now, 0)}s')
@@ -248,7 +251,7 @@ class MetricsEvaluator:
                     # PLOTS AND UPDATES
                     Y=[]
                     L=[]
-                    for m in m_res:
+                    for c,m in enumerate(m_res):
                         m.update(inp,out,saliency_map)
                         m.final_step()
                         print(f'The final {m.get_name()} score is {m.get_result()}')
@@ -260,12 +263,10 @@ class MetricsEvaluator:
                          label=L,
                          path=f'{outpath}plot_{k}.png',
                          title=f'label={class_name}, GT={gt_name}')
-                    for M in M_res:
+                    for c,M in enumerate(M_res):
                         M.update(inp,out,saliency_map)
-
                     #print(f'After one img: {int(time.time() - now)}s')
                     #now = time.time()
-
         return M_res,m_res
 
 

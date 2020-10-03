@@ -30,18 +30,26 @@ def run(i=0,arch='resnet',path='out/', img=None):
       #basic_visualize(input_.cpu(), scorecam_map.type(torch.FloatTensor).cpu(),save_path=outpath)
     elif arch == 'vgg16':
       # vgg
+
       vgg = models.vgg16(pretrained=True).eval()
       vgg_model_dict = dict(type='vgg16', arch=vgg, layer_name='features_29',input_size=(224, 224))
+
       vgg_scorecam = ScoreCAM(vgg_model_dict)
 
       input_image = load_image(img)
+
       input_ = apply_transforms(input_image)
+
       if torch.cuda.is_available():
         input_ = input_.cuda()
+
       out=vgg(input_)
+
       predicted_class = out.max(1)[-1]
 
+      #print(torch.cuda.memory_summary())
       scorecam_map = vgg_scorecam(input_)
+
       name='vgg16'+str(i)+'.png'
       outpath+=name
       #basic_visualize(input_.cpu(), scorecam_map.type(torch.FloatTensor).cpu(),save_path=outpath)

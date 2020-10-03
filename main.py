@@ -35,7 +35,10 @@ for arg in sys.argv[1:]:
 
 chunk_id,chunk_dim=[int(x) for x in params]
 num_imgs = chunk_dim
-displacement=0
+if chunk_id<6:
+    displacement=2000
+else:
+    displacement=0
 print(num_imgs)
 p = ''
 root = './'  # '/tirocinio_tesi/Score-CAM000/Score-CAM'
@@ -73,11 +76,12 @@ try:
     os.mkdir(f'{img_dict.get_outpath_root()}vgg16/')
 except:
     pass
+
 img_dict.set_outpath_root(f'{img_dict.get_outpath_root()}vgg16/')
 print(img_dict.get_outpath_root())
 print(img_dict.get_img_dict())
 
-resnet=EVMET.Architecture(models.resnet18(pretrained=True).eval(),'resnet')
+#resnet=EVMET.Architecture(models.resnet18(pretrained=True).eval(),'resnet')
 vgg16=EVMET.Architecture(models.vgg16(pretrained=True).eval(),'vgg16')
 avg_drop=ADIC.AverageDrop('average_drop',vgg16)
 inc_conf=ADIC.IncreaseInConfidence('increase_in_confidence',vgg16)
