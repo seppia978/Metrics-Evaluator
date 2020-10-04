@@ -30,7 +30,7 @@ class IncreaseInConfidence(EVMET.MetricOnAllDataset):
         if torch.cuda.is_available():
             self.arch.set_arch(self.arch.get_arch().cuda())
 
-    def one(M, m):
+    def one(self,M, m):
        return int(M > m)
 
     def update(self,inp,out,saliency_map):

@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="deb1f16a-4a04-4e88-acbf-3f53a9553099" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/metrics/deletion_and_insertion.py" beforeDir="false" afterPath="$PROJECT_DIR$/metrics/deletion_and_insertion.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/metrics/average_drop_and_increase_of_confidence.py" beforeDir="false" afterPath="$PROJECT_DIR$/metrics/average_drop_and_increase_of_confidence.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -37,11 +36,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/metrics/average_drop_and_increase_of_confidence.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="168">
-              <caret line="7" column="40" selection-start-line="7" selection-start-column="27" selection-end-line="7" selection-end-column="40" />
+            <state relative-caret-position="768">
+              <caret line="32" column="17" selection-start-line="32" selection-start-column="17" selection-end-line="32" selection-end-column="17" />
               <folding>
                 <element signature="e#52#64#0" expanded="true" />
               </folding>
@@ -67,7 +66,7 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="511">
@@ -165,9 +164,9 @@
         <option value="$PROJECT_DIR$/ScoreCAM/cam/scorecam.py" />
         <option value="$PROJECT_DIR$/ScoreCAM/test.py" />
         <option value="$PROJECT_DIR$/utils_functions.py" />
-        <option value="$PROJECT_DIR$/metrics/average_drop_and_increase_of_confidence.py" />
         <option value="$PROJECT_DIR$/metrics/deletion_and_insertion.py" />
         <option value="$PROJECT_DIR$/main.py" />
+        <option value="$PROJECT_DIR$/metrics/average_drop_and_increase_of_confidence.py" />
       </list>
     </option>
   </component>
@@ -293,12 +292,12 @@
       <workItem from="1601448435568" duration="3628000" />
       <workItem from="1601499724031" duration="16010000" />
       <workItem from="1601567519037" duration="15732000" />
-      <workItem from="1601824671065" duration="3109000" />
+      <workItem from="1601824671065" duration="3543000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="199056000" />
+    <option name="totallyTimeSpent" value="199490000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-309" y="-1448" width="2576" height="1416" extended-state="6" />
@@ -511,13 +510,6 @@
     <entry file="file://$PROJECT_DIR$/ScoreCAM/__init__.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/ScoreCAM/cam/scorecam.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="52">
-          <caret line="2" column="5" lean-forward="true" selection-start-line="2" selection-start-column="5" selection-end-line="2" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ScoreCAM/test.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="162">
@@ -542,13 +534,20 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/metrics/average_drop_and_increase_of_confidence.py">
+    <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="168">
-          <caret line="7" column="40" selection-start-line="7" selection-start-column="27" selection-end-line="7" selection-end-column="40" />
+        <state relative-caret-position="511">
+          <caret line="88" column="35" selection-start-line="88" selection-start-column="35" selection-end-line="88" selection-end-column="35" />
           <folding>
-            <element signature="e#52#64#0" expanded="true" />
+            <element signature="e#0#45#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ScoreCAM/cam/scorecam.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="52">
+          <caret line="2" column="5" lean-forward="true" selection-start-line="2" selection-start-column="5" selection-end-line="2" selection-end-column="17" />
         </state>
       </provider>
     </entry>
@@ -562,12 +561,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/main.py">
+    <entry file="file://$PROJECT_DIR$/metrics/average_drop_and_increase_of_confidence.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="511">
-          <caret line="88" column="35" selection-start-line="88" selection-start-column="35" selection-end-line="88" selection-end-column="35" />
+        <state relative-caret-position="768">
+          <caret line="32" column="17" selection-start-line="32" selection-start-column="17" selection-end-line="32" selection-end-column="17" />
           <folding>
-            <element signature="e#0#45#0" expanded="true" />
+            <element signature="e#52#64#0" expanded="true" />
           </folding>
         </state>
       </provider>
