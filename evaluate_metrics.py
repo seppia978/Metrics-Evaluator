@@ -217,6 +217,8 @@ class MetricsEvaluator:
                 # For each image
                 for i, (k,img) in enumerate(img_dict.get_items()):
                     print(f'image {i}')
+
+                    # Preliminary steps
                     outpath=img_dict.get_outpath_root()+f'{k}_{img}/'
                     inp_0=load_image(img_dict.get_path() + '/' + img)
                     try:
@@ -230,6 +232,8 @@ class MetricsEvaluator:
                     if torch.cuda.is_available():
                         inp = inp.cuda()
                     #print(f'Before test.run: {round(time.time() - now, 0)}s')
+
+                    # Get explanation map using the explanation method defined when creating the object
                     out, saliency_map = self.get_explanation_map(img=img_dict.get_path() + '/' + img)
                     out,saliency_map=out.detach(),saliency_map.detach()
                     F.to_pil_image(saliency_map.squeeze(0)).save(f'{outpath}/exp_map.png')
@@ -242,13 +246,15 @@ class MetricsEvaluator:
                     #print(f'After arch: {round(time.time() - now, 0)}s')
 
                     # print(type(out_sal),out_sal.shape)
-                    Y_i_c = out.max(1)[0].item()
+                    #Y_i_c = out.max(1)[0].item()
+
+                    # Get class idx for this img
                     class_idx = out.max(1)[-1].item()
                     class_name=labs[str(class_idx)]
                     gt_name=GT[str(img[-13:-5])][0].split()[1]
                     #O_i_c = out_sal[:, class_idx][0].item()
 
-                    # PLOTS AND UPDATES
+                    # Updates ad plots of the metrics on a single example
                     Y=[]
                     L=[]
                     for c,m in enumerate(m_res):
@@ -267,6 +273,7 @@ class MetricsEvaluator:
                         M.update(inp,out,saliency_map)
                     #print(f'After one img: {int(time.time() - now)}s')
                     #now = time.time()
+
         return M_res,m_res
 
 
