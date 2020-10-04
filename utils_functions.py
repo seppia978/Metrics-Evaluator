@@ -1,8 +1,5 @@
 import matplotlib.pyplot as plt
 
-def one(M, m):
-    return int(M > m)
-
 def plot(X,Y,label=None,dpi=300,path='out/plot.png',y_range=(0,1),title='Graph'):
   plt.figure(dpi=dpi)
   plt.title(title)
