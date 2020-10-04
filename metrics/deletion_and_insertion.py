@@ -87,8 +87,9 @@ def remove_more_important_px(img,exp_map,step=0.01):
         i = argmax // exp_map.shape[1]
         j = argmax % exp_map.shape[1]
         img[:, :, i, j]=zero.view(img[:, :, i, j].shape)
-        for idx in argmax[0]:
-            exp_map.view(-1,1)[idx]=0
+        #print(i,j)
+        exp_map[i,j]=0
+
         #img=im1.view(img.shape).clone()
         #for idx in argmax[0]:
         #    print(denormalize(img.view(-1,1,3)[idx]))
@@ -112,9 +113,7 @@ def insert_more_important_px(img,inp,exp_map,step=0.01):
         i = argmax // exp_map.shape[1]
         j = argmax % exp_map.shape[1]
         im[:, :, i, j] = img[:, :, i, j]
-        for idx in argmax[0]:
-            #im1[idx]=img1[idx]
-            exp_map.view(-1,1)[idx]=0
+        exp_map[i, j] = 0
 
         #plt.figure()
         #plt.imshow(denormalize(im1.view(im.shape)).cpu().squeeze(0).detach().permute(1, 2, 0).numpy())
