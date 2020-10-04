@@ -8,7 +8,7 @@ from images_utils.images_utils import *
 
 
 class Deletion(EVMET.MetricOnSingleExample):
-    def __init__(self,name,result,arch,st=0.01):
+    def __init__(self,name,arch,result=0,st=0.01):
         super().__init__(name,result,[])
         self.arch,self.st=arch,st
         if torch.cuda.is_available():
@@ -37,7 +37,7 @@ class Deletion(EVMET.MetricOnSingleExample):
                       torch.tensor(self.res_list).numpy()), 3)
 
 class Insertion(EVMET.MetricOnSingleExample):
-    def __init__(self,name,result,arch,st=0.01):
+    def __init__(self,name,arch,result=0,st=0.01):
         super().__init__(name,result,[])
         self.arch,self.st=arch,st
         if torch.cuda.is_available():

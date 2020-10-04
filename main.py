@@ -85,8 +85,8 @@ print(img_dict.get_img_dict())
 vgg16=EVMET.Architecture(models.vgg16(pretrained=True).eval(),'vgg16')
 avg_drop=ADIC.AverageDrop('average_drop',vgg16)
 inc_conf=ADIC.IncreaseInConfidence('increase_in_confidence',vgg16)
-deletion=DAI.Deletion('deletion',0,vgg16)
-insertion=DAI.Insertion('insertion',0,vgg16)
+deletion=DAI.Deletion('deletion',vgg16)
+insertion=DAI.Insertion('insertion',vgg16)
 
 em=EVMET.MetricsEvaluator(img_dict, saliency_map_extractor=test.run, model=vgg16.get_name(), metrics=[avg_drop, inc_conf, deletion, insertion])
 
