@@ -2,11 +2,10 @@
 
 import torch
 import torch.nn.functional as FF
-import evaluate_metrics as EVMET
+from MetricEvaluator import evaluate_metrics as EVMET
 from sklearn import metrics as SKM
 from images_utils.images_utils import *
-import matplotlib.pyplot as plt
-import time
+
 
 class Deletion(EVMET.MetricOnSingleExample):
     def __init__(self,name,result,arch,st=0.01):

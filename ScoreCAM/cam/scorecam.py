@@ -1,7 +1,6 @@
 import torch
 import torch.nn.functional as F
-from cam.basecam import *
-
+from ScoreCAM.cam.basecam import *
 
 class ScoreCAM(BaseCAM):
 

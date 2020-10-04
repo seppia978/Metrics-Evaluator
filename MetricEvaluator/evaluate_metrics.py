@@ -1,10 +1,9 @@
 import torch
-import torch.nn.functional as FF
 import torchvision.models as models
 
 import os
 
-from utils import *
+from ScoreCAM.utils import *
 
 
 from utils_functions import plot

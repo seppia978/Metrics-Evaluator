@@ -1,14 +1,14 @@
 from images_utils import images_utils as IMUT
-import evaluate_metrics as EVMET
+from MetricEvaluator import evaluate_metrics as EVMET
 import metrics.average_drop_and_increase_of_confidence as ADIC
 import metrics.deletion_and_insertion as DAI
 import torchvision.models as models
 import torch
-import test
+from ScoreCAM import test
 import sys
 import time
 import os
-import json
+
 
 def get_name_images(s):
     return str(s)[-13:-5]
@@ -88,7 +88,7 @@ inc_conf=ADIC.IncreaseInConfidence('increase_in_confidence',vgg16)
 deletion=DAI.Deletion('deletion',0,vgg16)
 insertion=DAI.Insertion('insertion',0,vgg16)
 
-em=EVMET.MetricsEvaluator(img_dict,saliency_map_extractor=test.run,model=vgg16.get_name(),metrics=[avg_drop,inc_conf,deletion,insertion])
+em=EVMET.MetricsEvaluator(img_dict, saliency_map_extractor=test.run, model=vgg16.get_name(), metrics=[avg_drop, inc_conf, deletion, insertion])
 
 start = time.time()
 now = start

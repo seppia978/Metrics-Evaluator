@@ -1,12 +1,11 @@
 import torch
 import torch.nn.functional as FF
-import torchvision.transforms.functional as F
 import torchvision.models as models
 from sklearn import metrics as SKM
 import os
 import time
 import get_explanation_map as expmap
-from utils import *
+from ScoreCAM.utils import *
 import metrics.average_drop_and_increase_of_confidence as ADIC
 import metrics.deletion_and_insertion as DAI
 from utils_functions import plot

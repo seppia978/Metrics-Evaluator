@@ -4,8 +4,8 @@ import torch
 import torch.nn.functional as F
 import torchvision.models as models
 
-from utils import *
-from cam.scorecam import *
+from ScoreCAM.utils import *
+from ScoreCAM.cam.scorecam import *
 
 def run(i=0,arch='resnet',path='out/', img=None):
   outpath=path

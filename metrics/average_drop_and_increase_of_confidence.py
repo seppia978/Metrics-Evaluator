@@ -2,7 +2,7 @@
 
 import torch
 from utils_functions import one
-import evaluate_metrics as EVMET
+from MetricEvaluator import evaluate_metrics as EVMET
 import torch.nn.functional as FF
 
 class AverageDrop(EVMET.MetricOnAllDataset):

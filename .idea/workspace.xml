@@ -2,8 +2,33 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="deb1f16a-4a04-4e88-acbf-3f53a9553099" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/ScoreCAM/cam/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/evaluate_metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/evaluate_metrics.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/ScoreCAM/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cam/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/ScoreCAM/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cam/basecam.py" beforeDir="false" afterPath="$PROJECT_DIR$/ScoreCAM/cam/basecam.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cam/scorecam.py" beforeDir="false" afterPath="$PROJECT_DIR$/ScoreCAM/cam/scorecam.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/evaluate_metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/MetricEvaluator/evaluate_metrics.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/ILSVRC2012_val_00000057.JPEG" beforeDir="false" afterPath="$PROJECT_DIR$/ScoreCAM/images/ILSVRC2012_val_00000057.JPEG" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/ILSVRC2012_val_00000073.JPEG" beforeDir="false" afterPath="$PROJECT_DIR$/ScoreCAM/images/ILSVRC2012_val_00000073.JPEG" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/ILSVRC2012_val_00000091.JPEG" beforeDir="false" afterPath="$PROJECT_DIR$/ScoreCAM/images/ILSVRC2012_val_00000091.JPEG" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/ILSVRC2012_val_00000198.JPEG" beforeDir="false" afterPath="$PROJECT_DIR$/ScoreCAM/images/ILSVRC2012_val_00000198.JPEG" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/ILSVRC2012_val_00000247.JPEG" beforeDir="false" afterPath="$PROJECT_DIR$/ScoreCAM/images/ILSVRC2012_val_00000247.JPEG" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/ILSVRC2012_val_00000476.JPEG" beforeDir="false" afterPath="$PROJECT_DIR$/ScoreCAM/images/ILSVRC2012_val_00000476.JPEG" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/ILSVRC2012_val_00000518.JPEG" beforeDir="false" afterPath="$PROJECT_DIR$/ScoreCAM/images/ILSVRC2012_val_00000518.JPEG" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/ILSVRC2012_val_00000562.JPEG" beforeDir="false" afterPath="$PROJECT_DIR$/ScoreCAM/images/ILSVRC2012_val_00000562.JPEG" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/ILSVRC2012_val_00002193.JPEG" beforeDir="false" afterPath="$PROJECT_DIR$/ScoreCAM/images/ILSVRC2012_val_00002193.JPEG" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/metrics/average_drop_and_increase_of_confidence.py" beforeDir="false" afterPath="$PROJECT_DIR$/metrics/average_drop_and_increase_of_confidence.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/metrics/deletion_and_insertion.py" beforeDir="false" afterPath="$PROJECT_DIR$/metrics/deletion_and_insertion.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pics/comparison.png" beforeDir="false" afterPath="$PROJECT_DIR$/ScoreCAM/pics/comparison.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pics/pipeline.png" beforeDir="false" afterPath="$PROJECT_DIR$/ScoreCAM/pics/pipeline.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/ScoreCAM/test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test001.py" beforeDir="false" afterPath="$PROJECT_DIR$/test001.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/ScoreCAM/utils/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/imagenet.py" beforeDir="false" afterPath="$PROJECT_DIR$/ScoreCAM/utils/imagenet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/resources/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/ScoreCAM/utils/resources/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/resources/imagenet_class_index.json" beforeDir="false" afterPath="$PROJECT_DIR$/ScoreCAM/utils/resources/imagenet_class_index.json" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -14,10 +39,10 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/evaluate_metrics.py">
+        <entry file="file://$PROJECT_DIR$/MetricEvaluator/evaluate_metrics.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1254">
-              <caret line="267" column="34" lean-forward="true" selection-start-line="267" selection-start-column="34" selection-end-line="267" selection-end-column="34" />
+            <state relative-caret-position="6262">
+              <caret line="266" column="34" selection-start-line="266" selection-start-column="34" selection-end-line="266" selection-end-column="34" />
               <folding>
                 <element signature="e#0#12#0" expanded="true" />
               </folding>
@@ -26,22 +51,19 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/metrics/deletion_and_insertion.py">
+        <entry file="file://$PROJECT_DIR$/ScoreCAM/test.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1071">
-              <caret line="69" column="58" selection-start-line="69" selection-start-column="58" selection-end-line="69" selection-end-column="58" />
-              <folding>
-                <element signature="e#55#67#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="162">
+              <caret line="6" column="28" lean-forward="true" selection-start-line="6" selection-start-column="28" selection-end-line="6" selection-end-column="28" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/metrics/average_drop_and_increase_of_confidence.py">
+        <entry file="file://$PROJECT_DIR$/ScoreCAM/cam/scorecam.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="204">
-              <caret line="15" column="62" selection-start-line="15" selection-start-column="62" selection-end-line="15" selection-end-column="62" />
+            <state relative-caret-position="52">
+              <caret line="2" column="5" lean-forward="true" selection-start-line="2" selection-start-column="5" selection-end-line="2" selection-end-column="17" />
             </state>
           </provider>
         </entry>
@@ -124,12 +146,14 @@
         <option value="$PROJECT_DIR$/test.py" />
         <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/evaluate_metrics.py" />
+        <option value="$PROJECT_DIR$/ScoreCAM/cam/scorecam.py" />
+        <option value="$PROJECT_DIR$/ScoreCAM/test.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="99" />
-    <option name="y" value="-1260" />
+    <option name="x" value="-54" />
+    <option name="y" value="-1180" />
     <option name="width" value="1238" />
     <option name="height" value="670" />
   </component>
@@ -149,12 +173,7 @@
             <path>
               <item name="Metrics-Evaluator" type="b2602c69:ProjectViewProjectNode" />
               <item name="Metrics-Evaluator" type="462c0819:PsiDirectoryNode" />
-              <item name="images_utils" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Metrics-Evaluator" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Metrics-Evaluator" type="462c0819:PsiDirectoryNode" />
-              <item name="metrics" type="462c0819:PsiDirectoryNode" />
+              <item name="MetricEvaluator" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -166,17 +185,18 @@
     <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="true" />
-    <property name="last_opened_file_path" value="$USER_HOME$/Application Data" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../Score-CAM" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="settings.editor.selected.configurable" value="web.server" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\spopp\Documents\GitHub\Metrics-Evaluator\MetricEvaluator" />
+      <recent name="C:\Users\spopp\Documents\GitHub\Metrics-Evaluator\ScoreCAM" />
+      <recent name="C:\Users\spopp\Documents\GitHub\Metrics-Evaluator" />
       <recent name="C:\Users\spopp\Documents\GitHub\Score-CAM" />
       <recent name="C:\Users\spopp\Documents\GitHub\Score-CAM\utils" />
-      <recent name="C:\Users\spopp\Documents\GitHub\Score-CAM\images_utils" />
-      <recent name="C:\Users\spopp\Documents\GitHub\Score-CAM\metrics" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -227,7 +247,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test.py" />
+      <option name="SCRIPT_NAME" value="C:\Users\spopp\Documents\GitHub\Metrics-Evaluator\ScoreCAM\test.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -258,16 +278,15 @@
       <workItem from="1601448435568" duration="3628000" />
       <workItem from="1601499724031" duration="16010000" />
       <workItem from="1601567519037" duration="15732000" />
-      <workItem from="1601824671065" duration="568000" />
+      <workItem from="1601824671065" duration="1681000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="196515000" />
+    <option name="totallyTimeSpent" value="197628000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-309" y="-1448" width="2576" height="1416" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.07829889" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -329,10 +348,10 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/vgg.png" />
     <entry file="file://$PROJECT_DIR$/alexnet.png" />
-    <entry file="file://$PROJECT_DIR$/utils/resources/__init__.py">
+    <entry file="file://$PROJECT_DIR$/ScoreCAM/utils/resources/__init__.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/utils/resources/imagenet_class_index.json">
+    <entry file="file://$PROJECT_DIR$/ScoreCAM/utils/resources/imagenet_class_index.json">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="255">
           <caret line="15" column="21" selection-start-line="15" selection-start-column="21" selection-end-line="15" selection-end-column="21" />
@@ -342,7 +361,7 @@
     <entry file="file://$USER_HOME$/AppData/Local/Temp/BvSshSftp/Bv002373/Bv002668/test.py" />
     <entry file="file://$USER_HOME$/AppData/Local/Temp/BvSshSftp/Bv002373/Bv002a7a/test000.py" />
     <entry file="file://$USER_HOME$/AppData/Local/Temp/BvSshSftp/Bv002373/Bv002686/test.py" />
-    <entry file="file://$PROJECT_DIR$/utils/imagenet.py">
+    <entry file="file://$PROJECT_DIR$/ScoreCAM/utils/imagenet.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$USER_HOME$/AppData/Local/Temp/BvSshSftp/Bv002373/Bv004604/test.py" />
@@ -350,13 +369,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="137">
           <caret line="231" column="4" selection-start-line="231" selection-start-column="4" selection-end-line="231" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../Score-CAM - Copia/test.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="748">
-          <caret line="49" column="39" selection-end-line="49" selection-end-column="96" />
         </state>
       </provider>
     </entry>
@@ -376,13 +388,6 @@
           <folding>
             <element signature="e#0#22#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cam/basecam.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="17" column="8" selection-start-line="17" selection-start-column="8" selection-end-line="17" selection-end-column="8" />
         </state>
       </provider>
     </entry>
@@ -422,32 +427,12 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/get_explanation_map.py" />
-    <entry file="file://$PROJECT_DIR$/utils/__init__.py">
+    <entry file="file://$PROJECT_DIR$/ScoreCAM/utils/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="835">
           <caret line="171" column="23" lean-forward="true" selection-start-line="163" selection-start-column="4" selection-end-line="171" selection-end-column="23" />
           <folding>
             <element signature="e#133#154#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cam/scorecam.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="184">
-          <caret line="63" column="34" selection-start-line="63" selection-start-column="34" selection-end-line="63" selection-end-column="34" />
-          <folding>
-            <element signature="e#0#12#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="184">
-          <caret line="49" column="12" selection-start-line="49" selection-start-column="7" selection-end-line="49" selection-end-column="12" />
-          <folding>
-            <element signature="e#35#47#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -503,10 +488,65 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/evaluate_metrics.py">
+    <entry file="file://$PROJECT_DIR$/ScoreCAM/cam/__init__.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ScoreCAM/cam/basecam.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1254">
-          <caret line="267" column="34" lean-forward="true" selection-start-line="267" selection-start-column="34" selection-end-line="267" selection-end-column="34" />
+        <state relative-caret-position="255">
+          <caret line="17" column="8" selection-start-line="17" selection-start-column="8" selection-end-line="17" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ILSVRC2012_devkit_t12/data/control.txt">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ILSVRC2012_devkit_t12/data/imagenet_classes.txt">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ILSVRC2012_devkit_t12/data/IMAGENET_val_path.txt">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ILSVRC2012_devkit_t12/data/ILSVRC2012_validation_ground_truth.txt">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ILSVRC2012_devkit_t12/COPYING">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ILSVRC2012_devkit_t12/readme.txt">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ILSVRC2012_devkit_t12/data/lables.txt">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../Score-CAM - Copia/test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="387">
+          <caret line="26" column="17" lean-forward="true" selection-start-line="26" selection-start-column="17" selection-end-line="26" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ScoreCAM/__init__.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ScoreCAM/cam/scorecam.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="52">
+          <caret line="2" column="5" lean-forward="true" selection-start-line="2" selection-start-column="5" selection-end-line="2" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ScoreCAM/test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="162">
+          <caret line="6" column="28" lean-forward="true" selection-start-line="6" selection-start-column="28" selection-end-line="6" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MetricEvaluator/evaluate_metrics.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="6262">
+          <caret line="266" column="34" selection-start-line="266" selection-start-column="34" selection-end-line="266" selection-end-column="34" />
           <folding>
             <element signature="e#0#12#0" expanded="true" />
           </folding>
