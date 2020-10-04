@@ -92,23 +92,6 @@ def remove_more_important_px(img,exp_map,step=0.01):
         #img=im1.view(img.shape).clone()
         #for idx in argmax[0]:
         #    print(denormalize(img.view(-1,1,3)[idx]))
-        '''
-        
-        print(img.view(1,-1,3).shape)
-        for _ in range(max_iter):
-            #print(max_iter)
-            argmax=exp_map.argmax()
-            #print(argmax in exp_map.view(1,-1).topk(max_iter)[1])
-            i = argmax // exp_map.shape[1]
-            j = argmax % exp_map.shape[1]
-            zero=trans(torch.zeros(3).unsqueeze(1).unsqueeze(1)).cuda()
-            img[:,:,i,j]=zero.view(1,3)
-            exp_map[i,j]=0
-            #print(i,j,zero)
-
-            #if (iii+1) % 1000 == 0:
-            #    print(iii,max_iter)
-        '''
         #print(denormalize(zero), denormalize(img).min(), denormalize(img).max())
         #plt.figure()
         #plt.imshow(denormalize(img).squeeze(0).cpu().detach().permute(1,2,0).numpy())

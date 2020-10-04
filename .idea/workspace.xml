@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="deb1f16a-4a04-4e88-acbf-3f53a9553099" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/metrics/average_drop_and_increase_of_confidence.py" beforeDir="false" afterPath="$PROJECT_DIR$/metrics/average_drop_and_increase_of_confidence.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/metrics/deletion_and_insertion.py" beforeDir="false" afterPath="$PROJECT_DIR$/metrics/deletion_and_insertion.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils_functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils_functions.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -29,8 +27,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/metrics/deletion_and_insertion.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="375">
-              <caret line="72" column="52" lean-forward="true" selection-start-line="72" selection-start-column="52" selection-end-line="72" selection-end-column="52" />
+            <state relative-caret-position="2100">
+              <caret line="93" column="54" selection-start-line="93" selection-start-column="54" selection-end-line="93" selection-end-column="54" />
               <folding>
                 <element signature="e#55#67#0" expanded="true" />
               </folding>
@@ -164,8 +162,8 @@
         <option value="$PROJECT_DIR$/ScoreCAM/cam/scorecam.py" />
         <option value="$PROJECT_DIR$/ScoreCAM/test.py" />
         <option value="$PROJECT_DIR$/utils_functions.py" />
-        <option value="$PROJECT_DIR$/metrics/deletion_and_insertion.py" />
         <option value="$PROJECT_DIR$/metrics/average_drop_and_increase_of_confidence.py" />
+        <option value="$PROJECT_DIR$/metrics/deletion_and_insertion.py" />
       </list>
     </option>
   </component>
@@ -291,15 +289,16 @@
       <workItem from="1601448435568" duration="3628000" />
       <workItem from="1601499724031" duration="16010000" />
       <workItem from="1601567519037" duration="15732000" />
-      <workItem from="1601824671065" duration="2098000" />
+      <workItem from="1601824671065" duration="2159000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="198045000" />
+    <option name="totallyTimeSpent" value="198106000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-309" y="-1448" width="2576" height="1416" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.07829889" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -558,8 +557,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/metrics/deletion_and_insertion.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="375">
-          <caret line="72" column="52" lean-forward="true" selection-start-line="72" selection-start-column="52" selection-end-line="72" selection-end-column="52" />
+        <state relative-caret-position="2100">
+          <caret line="93" column="54" selection-start-line="93" selection-start-column="54" selection-end-line="93" selection-end-column="54" />
           <folding>
             <element signature="e#55#67#0" expanded="true" />
           </folding>
