@@ -35,10 +35,9 @@ for arg in sys.argv[1:]:
 
 chunk_id,chunk_dim=[int(x) for x in params]
 num_imgs = chunk_dim
-if chunk_id<6:
-    displacement=2000
-else:
-    displacement=0
+
+displacement=4000
+
 print(num_imgs)
 p = ''
 root = './'  # '/tirocinio_tesi/Score-CAM000/Score-CAM'
