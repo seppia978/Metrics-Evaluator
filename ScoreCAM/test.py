@@ -7,7 +7,7 @@ import torchvision.models as models
 from ScoreCAM.utils import *
 from ScoreCAM.cam.scorecam import *
 
-def run(i=0,arch='resnet',path='out/', img=None):
+def run(i=0,arch='resnet',path='out/', img=None, target=None):
   outpath=path
   if img is not None:
     if arch == 'alexnet':
@@ -24,7 +24,7 @@ def run(i=0,arch='resnet',path='out/', img=None):
       out=alexnet(input_)
       predicted_class = out.max(1)[-1]
 
-      scorecam_map = alexnet_scorecam(input_)
+      scorecam_map = alexnet_scorecam(input_,class_idx=target)
       name='alex'+str(i)+'.png'
       outpath+=name
       #basic_visualize(input_.cpu(), scorecam_map.type(torch.FloatTensor).cpu(),save_path=outpath)
@@ -45,10 +45,10 @@ def run(i=0,arch='resnet',path='out/', img=None):
 
       out=vgg(input_)
 
-      predicted_class = out.max(1)[-1]
+      #predicted_class = out.max(1)[-1]
 
       #print(torch.cuda.memory_summary())
-      scorecam_map = vgg_scorecam(input_)
+      scorecam_map = vgg_scorecam(input_,class_idx=target)
 
       name='vgg16'+str(i)+'.png'
       outpath+=name
@@ -67,7 +67,7 @@ def run(i=0,arch='resnet',path='out/', img=None):
       out=resnet(input_)
       #score_c,predicted_class = out,out.max(1)[-1]
 
-      scorecam_map = resnet_scorecam(input_)
+      scorecam_map = resnet_scorecam(input_,class_idx=target)
       name='resnet'+str(i)+'.png'
       outpath+=name
       #basic_visualize(input_.cpu(), scorecam_map.type(torch.FloatTensor).cpu(),save_path=outpath)

@@ -186,8 +186,8 @@ class MetricsEvaluator:
         self.metrics.append(Metric(name,func))
 
     # EVALUATE METRICS
-    def get_explanation_map(self,img=None):
-        return self.saliency_map_extractor(arch=self.model, img=img)
+    def get_explanation_map(self,img=None,target=None):
+        return self.saliency_map_extractor(arch=self.model, img=img,target=target)
 
     def evaluate_metrics(self):#,**kwargs):
         img_dict, saliency_map_extractor, model, metrics, times=self.img_dict,self.saliency_map_extractor,self.model,self.metrics,self.times
@@ -232,8 +232,16 @@ class MetricsEvaluator:
                         inp = inp.cuda()
                     #print(f'Before test.run: {round(time.time() - now, 0)}s')
 
+
+                    out = FF.softmax(arch(inp), dim=1)
+
+                    # Get class idx for this img
+                    class_idx = out.max(1)[-1].item()
+                    class_name = labs[str(class_idx)]
+                    gt_name = GT[str(img[-13:-5])][0].split()[1]
+
                     # Get explanation map using the explanation method defined when creating the object
-                    out, saliency_map = FF.softmax(arch(inp), dim=1),self.get_explanation_map(img=img_dict.get_path() + '/' + img)
+                    saliency_map=self.get_explanation_map(img=img_dict.get_path() + '/' + img,target=class_idx)
                     out,saliency_map=out.detach(),saliency_map.detach()
                     F.to_pil_image(saliency_map.squeeze(0)).save(f'{outpath}/exp_map.png')
                     #print(f'After test.run: {round(time.time() - now, 0)}s')
@@ -247,18 +255,16 @@ class MetricsEvaluator:
                     # print(type(out_sal),out_sal.shape)
                     #Y_i_c = out.max(1)[0].item()
 
-                    # Get class idx for this img
-                    class_idx = out.max(1)[-1].item()
-                    class_name=labs[str(class_idx)]
-                    gt_name=GT[str(img[-13:-5])][0].split()[1]
+
                     #O_i_c = out_sal[:, class_idx][0].item()
 
                     # Updates ad plots of the metrics on a single example
                     Y=[]
                     L=[]
+
                     plt.figure()
                     plt.imshow(denormalize(inp*saliency_map).squeeze(0).cpu().detach().permute(1,2,0).numpy())
-                    plt.savefig(f'out/fig222.png')
+                    plt.savefig(f'{outpath}/inp*sal.png')
                     for c,m in enumerate(m_res):
                         m.update(inp,out,saliency_map)
                         m.final_step()
