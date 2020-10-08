@@ -17,9 +17,7 @@ class AverageDrop(EVMET.MetricOnAllDataset):
             inp = inp.cuda()
         out_sal = FF.softmax(self.arch.get_arch()(inp * saliency_map), dim=1)
         O_i_c = out_sal[:, class_idx][0].item()
-        print(self.arch.get_name())
         self.result += (max(0.0, Y_i_c - O_i_c) / Y_i_c)
-
     def final_step(self,num_imgs):
         self.result=self.result * 100 / num_imgs
 

@@ -1,6 +1,6 @@
 import torch
 import torchvision.models as models
-
+import torch.nn.functional as FF
 import os
 
 from ScoreCAM.utils import *
@@ -233,7 +233,7 @@ class MetricsEvaluator:
                     #print(f'Before test.run: {round(time.time() - now, 0)}s')
 
                     # Get explanation map using the explanation method defined when creating the object
-                    out, saliency_map = self.get_explanation_map(img=img_dict.get_path() + '/' + img)
+                    out, saliency_map = FF.softmax(arch(inp), dim=1),self.get_explanation_map(img=img_dict.get_path() + '/' + img)
                     out,saliency_map=out.detach(),saliency_map.detach()
                     F.to_pil_image(saliency_map.squeeze(0)).save(f'{outpath}/exp_map.png')
                     #print(f'After test.run: {round(time.time() - now, 0)}s')
@@ -256,6 +256,9 @@ class MetricsEvaluator:
                     # Updates ad plots of the metrics on a single example
                     Y=[]
                     L=[]
+                    plt.figure()
+                    plt.imshow(denormalize(inp*saliency_map).squeeze(0).cpu().detach().permute(1,2,0).numpy())
+                    plt.savefig(f'out/fig222.png')
                     for c,m in enumerate(m_res):
                         m.update(inp,out,saliency_map)
                         m.final_step()

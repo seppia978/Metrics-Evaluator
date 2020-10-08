@@ -72,5 +72,5 @@ def run(i=0,arch='resnet',path='out/', img=None):
       outpath+=name
       #basic_visualize(input_.cpu(), scorecam_map.type(torch.FloatTensor).cpu(),save_path=outpath)
 
-    return F.softmax(out, dim=1), scorecam_map.type(torch.FloatTensor).cpu()
+    return scorecam_map.type(torch.FloatTensor).cpu()
 

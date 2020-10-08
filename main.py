@@ -36,7 +36,7 @@ for arg in sys.argv[1:]:
 chunk_id,chunk_dim=[int(x) for x in params]
 num_imgs = chunk_dim
 
-displacement=4000
+displacement=17000
 
 print(num_imgs)
 p = ''
