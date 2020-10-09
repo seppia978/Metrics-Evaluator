@@ -232,8 +232,8 @@ class MetricsEvaluator:
                         inp = inp.cuda()
                     #print(f'Before test.run: {round(time.time() - now, 0)}s')
 
-
-                    out = FF.softmax(arch(inp), dim=1)
+                    with torch.no_grad():
+                        out = FF.softmax(arch(inp), dim=1)
 
                     # Get class idx for this img
                     class_idx = out.max(1)[-1].item()
