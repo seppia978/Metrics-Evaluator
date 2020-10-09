@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="deb1f16a-4a04-4e88-acbf-3f53a9553099" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/MetricEvaluator/evaluate_metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/MetricEvaluator/evaluate_metrics.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/metrics/average_drop_and_increase_of_confidence.py" beforeDir="false" afterPath="$PROJECT_DIR$/metrics/average_drop_and_increase_of_confidence.py" afterDir="false" />
-    </list>
+    <list default="true" id="deb1f16a-4a04-4e88-acbf-3f53a9553099" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -300,12 +297,12 @@
       <workItem from="1601824671065" duration="8714000" />
       <workItem from="1601912031794" duration="8830000" />
       <workItem from="1602148064093" duration="11196000" />
-      <workItem from="1602233598785" duration="3310000" />
+      <workItem from="1602233598785" duration="3318000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="227997000" />
+    <option name="totallyTimeSpent" value="228005000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-308" y="-1448" width="2576" height="1416" extended-state="6" />
