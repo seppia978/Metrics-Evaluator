@@ -139,7 +139,7 @@ class MetricsEvaluator:
     available_metrics=[]
 
     # CONSTRUCTOR
-    def __init__(self,img_dict, saliency_map_extractor=None, model='resnet',metrics=[],times=1):
+    def __init__(self,img_dict, saliency_map_extractor=None, model=Architecture(models.resnet18(pretrained=True).eval(),'resnet18'),metrics=[],times=1):
         self.img_dict,self.saliency_map_extractor,self.model,self.metrics,self.times=img_dict, saliency_map_extractor, model,[m for m in metrics],times
         for x in self.metrics:
             self.available_metrics.append(x.get_name())
@@ -196,15 +196,17 @@ class MetricsEvaluator:
         GT=img_dict.get_GT()
         labs=img_dict.get_labels()
         num_imgs = len(img_dict)
-        if model == 'resnet':
+        '''
+        if model == 'resnet18':
             arch_obj = Architecture(models.resnet18(pretrained=True).eval(),model)
         elif model == 'vgg16':
             arch_obj = Architecture(models.vgg16(pretrained=True).eval(),model)
         elif model == 'alexnet':
             arch_obj = Architecture(models.alexnet(pretrained=True).eval(),model)
+        '''
 
         if torch.cuda.is_available():
-            arch = arch_obj.get_arch().cuda()
+            arch = self.model.get_arch().cuda()
         precision = 100
 
 
@@ -227,7 +229,7 @@ class MetricsEvaluator:
                     inp_0.save(f'{outpath}{img}')
 
                     # Apply transformation
-                    inp = arch_obj.apply_transform(inp_0)
+                    inp = self.model.apply_transform(inp_0)
                     if torch.cuda.is_available():
                         inp = inp.cuda()
                     #print(f'Before test.run: {round(time.time() - now, 0)}s')

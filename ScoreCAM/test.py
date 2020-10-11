@@ -7,10 +7,10 @@ import torchvision.models as models
 from ScoreCAM.utils import *
 from ScoreCAM.cam.scorecam import *
 
-def run(i=0,arch='resnet',path='out/', img=None, target=None):
+def run(i=0,arch=None,path='out/', img=None, target=None):
   outpath=path
   if img is not None:
-    if arch == 'alexnet':
+    if arch.get_name() == 'alexnet':
       # alexnet
       alexnet = models.alexnet(pretrained=True).eval()
       alexnet_model_dict = dict(type='alexnet', arch=alexnet, layer_name='features_10',input_size=(224, 224))
@@ -28,7 +28,7 @@ def run(i=0,arch='resnet',path='out/', img=None, target=None):
       name='alex'+str(i)+'.png'
       outpath+=name
       #basic_visualize(input_.cpu(), scorecam_map.type(torch.FloatTensor).cpu(),save_path=outpath)
-    elif arch == 'vgg16':
+    elif arch.get_name() == 'vgg16':
       # vgg
 
       vgg = models.vgg16(pretrained=True).eval()
@@ -54,7 +54,7 @@ def run(i=0,arch='resnet',path='out/', img=None, target=None):
       outpath+=name
       #basic_visualize(input_.cpu(), scorecam_map.type(torch.FloatTensor).cpu(),save_path=outpath)
 
-    elif arch == 'resnet':
+    elif arch.get_name() == 'resnet18':
       # resnet
       resnet = models.resnet18(pretrained=True).eval()
       resnet_model_dict = dict(type='resnet18', arch=resnet, layer_name='layer4',input_size=(224, 224))
