@@ -10,26 +10,11 @@ from ScoreCAM import test
 import sys
 import time
 import os
-from torchcam.cams import CAM, GradCAM, GradCAMpp, SmoothGradCAMpp, ScoreCAM, SSCAM
-from torchvision.transforms.functional import normalize, resize, to_tensor, to_pil_image
+from xdeep.xlocal.gradient.explainers import *
 import matplotlib.pyplot as plt
 import torch.nn.functional as FF
 
-VGG_CONFIG = {_vgg: dict(input_layer='features', conv_layer='features')
-              for _vgg in models.vgg.__dict__.keys()}
-
-RESNET_CONFIG = {_resnet: dict(input_layer='conv1', conv_layer='layer4', fc_layer='fc')
-                 for _resnet in models.resnet.__dict__.keys()}
-
-DENSENET_CONFIG = {_densenet: dict(input_layer='features', conv_layer='features', fc_layer='classifier')
-                   for _densenet in models.densenet.__dict__.keys()}
-
-MODEL_CONFIG = {
-    **VGG_CONFIG, **RESNET_CONFIG, **DENSENET_CONFIG,
-    'mobilenet_v2': dict(input_layer='features', conv_layer='features')
-}
-
-
+CAMS={'ScoreCAM':ScoreCAM,'GradCAM':GradCAM,'GradCAM++':GradCAMpp}
 
 def apply_transform(image,size=224):
     means,stds=[0.485, 0.456, 0.406],[0.229, 0.224, 0.225]
@@ -50,28 +35,21 @@ def apply_transform(image,size=224):
 
     return tensor
 
-def run(arch, img, target):
-    input = Image.open(img).convert('RGB')
-    input = apply_transform(input)
+def run(*params,arch, img, target):
+    CAM=params[0]
+    im = Image.open(img).convert('RGB')
+    input = apply_transform(im)
     model = arch
-    conv_layer = MODEL_CONFIG[model.get_name()]['conv_layer']
-    input_layer = MODEL_CONFIG[model.get_name()]['input_layer']
-    #fc_layer = MODEL_CONFIG[arch]['fc_layer']
-    #cam_extractors = [CAM(model, conv_layer, fc_layer), GradCAM(model, conv_layer),
-    #                  GradCAMpp(model, conv_layer), SmoothGradCAMpp(model, conv_layer, input_layer),
-    #                  ScoreCAM(model, conv_layer, input_layer), SSCAM(model, conv_layer, input_layer),
-    #                  ]#ISSCAM(model, conv_layer, input_layer)]
-    cam=ScoreCAM(model.get_arch(), conv_layer, input_layer)
-    if torch.cuda.is_available():
-        input = input.cuda()
-    with torch.no_grad(): out = FF.softmax(model.get_arch()(input),dim=1)
-    ret=cam(class_idx=target,scores=out).cpu()
-    heatmap = to_pil_image(ret, mode='F')
-    plt.figure()
-    plt.imshow(heatmap)
-    plt.savefig(f'heat.png')
-    print(model,target,out[:,target],ret,ret.shape)
-    return ret
+
+    md = {'arch': model.get_arch().cpu(), 'layer_name': model.layer}
+    cam = CAM(md)
+    salmap = cam.forward(input, class_idx=target)
+
+    ##plt.figure()
+    #plt.imshow(salmap.squeeze(0).squeeze(0))
+    #plt.savefig(f'result{str(cam)}.png')
+
+    return salmap
 
 
 
@@ -135,39 +113,40 @@ base,window=chunk_id*chunk_dim+displacement,chunk_dim
 pattern='ILSVRC2012_val_********.JPEG'
 img_list=get_n_imgs(range(base+1,base+window+1),pattern)
 
-img_dict=IMUT.IMG_list(path=p,GT=GT,labs=labs).select_imgs(img_list)
-try:
-    os.mkdir(f'{img_dict.get_outpath_root()}vgg16/')
-except:
-    pass
+#arch=EVMET.Architecture(models.resnet18(pretrained=True).eval(),'resnet18','layer4')
+arch=EVMET.Architecture(models.vgg16(pretrained=True).eval(),'vgg16','features_29')
 
-img_dict.set_outpath_root(f'{img_dict.get_outpath_root()}vgg16/')
-print(img_dict.get_outpath_root())
-print(img_dict.get_img_dict())
-
-
-
-arch=EVMET.Architecture(models.resnet18(pretrained=True).eval(),'resnet18')
-#arch=EVMET.Architecture(models.vgg16(pretrained=True).eval(),'vgg16')
 avg_drop=ADIC.AverageDrop('average_drop',arch)
 inc_conf=ADIC.IncreaseInConfidence('increase_in_confidence',arch)
 deletion=DAI.Deletion('deletion',arch)
 insertion=DAI.Insertion('insertion',arch)
 
-em=EVMET.MetricsEvaluator(img_dict, saliency_map_extractor=run, model=arch, metrics=[avg_drop, inc_conf, deletion, insertion])
+img_dict = IMUT.IMG_list(path=p, GT=GT, labs=labs).select_imgs(img_list)
 
+em = EVMET.MetricsEvaluator(img_dict, saliency_map_extractor=run, model=arch,
+                                metrics=[avg_drop, inc_conf, deletion, insertion])
 start = time.time()
 now = start
-M_res,m_res=em.evaluate_metrics()
-print(f'Execution time: {int(time.time() - start)}s')
-print(f'In {num_imgs} images')
-for M in M_res:
-    M.final_step(num_imgs)
-    print(f'The final {M.get_name()} is: {round(M.get_result(), 2)}%')
+path0=img_dict.get_outpath_root()
+for c in CAMS.keys():
+    try:
+        os.mkdir(f'{path0}vgg16_{str(c)}/')
+    except:
+        pass
+    img_dict.set_outpath_root(f'{path0}vgg16_{str(c)}/')
+    print(img_dict.get_outpath_root())
+    print(img_dict.get_img_dict())
 
-f=open(f'{outpath_root}output.txt','a')
-output={f'Chunk{chunk_id}':([m.get_result() for m in M_res],[torch.tensor(m.get_result()).mean().item() for m in m_res])}
-f.write(str(output))
-f.write('\n')
-((M.clear(),m.clear()) for M,m in zip(M_res,m_res))
+    M_res,m_res=em.evaluate_metrics(CAMS[c])
+    print(f'Execution time: {int(time.time() - start)}s')
+    print(f'In {num_imgs} images')
+    for M in M_res:
+        print(f'The final {M.get_name()} is: {round(M.get_result(), 2)}%')
+
+    f=open(f'{outpath_root}output.txt','a')
+    output={(f'Chunk{chunk_id}',f'{c}'):([m.get_result() for m in M_res],[torch.tensor(m.get_result()).mean().item() for m in m_res])}
+    f.write(str(output))
+    f.write('\n')
+    for m in em.metrics:
+        m.clear()
 

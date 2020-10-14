@@ -12,8 +12,8 @@ def list_metrics(em):
     return em.__list_metrics__()
 
 class Architecture:
-    def __init__(self,arch, name,T=None,DeT=None,means=[0.485, 0.456, 0.406],stds=[0.229, 0.224, 0.225]):
-        self.arch,self.name,self.T,self.DeT,self.means,self.stds=arch,name,T,DeT,means,stds
+    def __init__(self,arch, name,layer,T=None,DeT=None,means=[0.485, 0.456, 0.406],stds=[0.229, 0.224, 0.225]):
+        self.arch,self.name,self.layer,self.T,self.DeT,self.means,self.stds=arch,name,layer,T,DeT,means,stds
 
     def get_name(self):
         return self.name
@@ -139,7 +139,7 @@ class MetricsEvaluator:
     available_metrics=[]
 
     # CONSTRUCTOR
-    def __init__(self,img_dict, saliency_map_extractor=None, model=Architecture(models.resnet18(pretrained=True).eval(),'resnet18'),metrics=[],times=1):
+    def __init__(self,img_dict, saliency_map_extractor=None, model=Architecture(models.resnet18(pretrained=True).eval(),'resnet18','layer4'),metrics=[],times=1):
         self.img_dict,self.saliency_map_extractor,self.model,self.metrics,self.times=img_dict, saliency_map_extractor, model,[m for m in metrics],times
         for x in self.metrics:
             self.available_metrics.append(x.get_name())
@@ -186,29 +186,20 @@ class MetricsEvaluator:
         self.metrics.append(Metric(name,func))
 
     # EVALUATE METRICS
-    def get_explanation_map(self,img=None,target=None):
-        return self.saliency_map_extractor(arch=self.model, img=img,target=target)
+    def get_explanation_map(self,*params,img=None,target=None):
+        return self.saliency_map_extractor(*params,arch=self.model, img=img,target=target)
 
-    def evaluate_metrics(self):#,**kwargs):
+    def evaluate_metrics(self,*params):#,**kwargs):
         img_dict, saliency_map_extractor, model, metrics, times=self.img_dict,self.saliency_map_extractor,self.model,self.metrics,self.times
         #for k in kwargs:
         #    k=kwargs[k]
         GT=img_dict.get_GT()
         labs=img_dict.get_labels()
         num_imgs = len(img_dict)
-        '''
-        if model == 'resnet18':
-            arch_obj = Architecture(models.resnet18(pretrained=True).eval(),model)
-        elif model == 'vgg16':
-            arch_obj = Architecture(models.vgg16(pretrained=True).eval(),model)
-        elif model == 'alexnet':
-            arch_obj = Architecture(models.alexnet(pretrained=True).eval(),model)
-        '''
 
         if torch.cuda.is_available():
             arch = self.model.get_arch().cuda()
         precision = 100
-
 
         if metrics is not []:
             for _ in range(times):
@@ -243,8 +234,8 @@ class MetricsEvaluator:
                     gt_name = GT[str(img[-13:-5])][0].split()[1]
 
                     # Get explanation map using the explanation method defined when creating the object
-                    saliency_map=self.get_explanation_map(img=img_dict.get_path() + '/' + img,target=class_idx)
-                    out,saliency_map=out.detach(),saliency_map.detach()
+                    saliency_map=self.get_explanation_map(*params,img=f'{img_dict.get_path()}/{img}',target=class_idx)
+                    out,saliency_map=out.detach(),saliency_map#.detach()
                     F.to_pil_image(saliency_map.squeeze(0)).save(f'{outpath}/exp_map.png')
                     #print(f'After test.run: {round(time.time() - now, 0)}s')
                     if torch.cuda.is_available():
@@ -284,6 +275,8 @@ class MetricsEvaluator:
                     #print(f'After one img: {int(time.time() - now)}s')
                     #now = time.time()
 
+        for M in M_res:
+            M.final_step(num_imgs)
         return M_res,m_res
 
 

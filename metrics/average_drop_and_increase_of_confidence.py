@@ -15,6 +15,7 @@ class AverageDrop(EVMET.MetricOnAllDataset):
         Y_i_c,class_idx=out.max(1)[0].item(),out.max(1)[-1].item()
         if torch.cuda.is_available():
             inp = inp.cuda()
+            self.arch.arch = self.arch.arch.cuda()
         with torch.no_grad():
             out_sal = FF.softmax(self.arch.get_arch()(inp * saliency_map), dim=1)
         O_i_c = out_sal[:, class_idx][0].item()
@@ -36,6 +37,7 @@ class IncreaseInConfidence(EVMET.MetricOnAllDataset):
         Y_i_c,class_idx=out.max(1)[0].item(),out.max(1)[-1].item()
         if torch.cuda.is_available():
             inp = inp.cuda()
+            self.arch.arch = self.arch.arch.cuda()
         with torch.no_grad():
             out_sal = FF.softmax(self.arch.get_arch()(inp * saliency_map), dim=1)
         O_i_c = out_sal[:, class_idx][0].item()
