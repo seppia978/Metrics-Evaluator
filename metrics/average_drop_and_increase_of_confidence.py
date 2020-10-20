@@ -11,8 +11,7 @@ class AverageDrop(EVMET.MetricOnAllDataset):
         if torch.cuda.is_available():
             self.arch.set_arch(self.arch.get_arch().cuda())
 
-    def update(self,inp,out,saliency_map):
-        Y_i_c,class_idx=out.max(1)[0].item(),out.max(1)[-1].item()
+    def update(self,inp,Y_i_c,class_idx,saliency_map):
         if torch.cuda.is_available():
             inp = inp.cuda()
             self.arch.arch = self.arch.arch.cuda()
@@ -33,8 +32,7 @@ class IncreaseInConfidence(EVMET.MetricOnAllDataset):
     def one(self,M, m):
        return int(M > m)
 
-    def update(self,inp,out,saliency_map):
-        Y_i_c,class_idx=out.max(1)[0].item(),out.max(1)[-1].item()
+    def update(self,inp,Y_i_c,class_idx,saliency_map):
         if torch.cuda.is_available():
             inp = inp.cuda()
             self.arch.arch = self.arch.arch.cuda()

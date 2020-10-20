@@ -3,34 +3,57 @@ from MetricEvaluator import evaluate_metrics as EVMET
 import metrics.average_drop_and_increase_of_confidence as ADIC
 import metrics.deletion_and_insertion as DAI
 import torchvision.models as models
+import torch.nn.functional as F
 import torch
 import torchvision.transforms as transforms
 import PIL.Image as Image
-from ScoreCAM import test
+#from ScoreCAM import test
 import sys
 import time
 import os
-from xdeep.xlocal.gradient.explainers import *
-
+from torchcammaster.torchcam.cams import CAM, GradCAM, GradCAMpp, SmoothGradCAMpp, ScoreCAM, SSCAM, ISSCAM
 import matplotlib.pyplot as plt
 import torch.nn.functional as FF
 torch.set_num_threads(1)
-CAMS={'GradCAM':GradCAM,'GradCAM++':GradCAMpp}
 
+def apply_transform(image,size=224):
+    means,stds=[0.485, 0.456, 0.406],[0.229, 0.224, 0.225]
+    #if not isinstance(image, Image.Image):
+    #    image = F.to_pil_image(image)
 
+    transform = transforms.Compose([
+        transforms.Resize(size),
+        transforms.CenterCrop(size),
+        transforms.ToTensor(),
+        transforms.Normalize(means,stds)
+    ])
 
-def run(*params,arch, img, target):
+    # print(image.shape)
+    tensor = transform(image).unsqueeze(0)
+
+    tensor.requires_grad = True
+
+    return tensor
+
+def run(*params,arch, out, target):
     #st=time.time()
     #now=st
-    CAM=params[0]
-    input = img
+    #CAM=params[0]
+    #im = Image.open(img,mode='r').convert('RGB')
+    #input = apply_transform(im).cuda()
     model = arch
 
     #print('-----first in run', time.time()-now,'\n')
-    md = {'arch': model.get_arch(), 'layer_name': model.layer}
-    cam = CAM(md)
+    print(out.device)
+    #scores = model.arch(input)
+    cam=params[0]
+    print(out[0].isnan().any())
     #print('-----after creating object in run', time.time() - now,'\n')
-    salmap = cam(input, class_idx=target)
+    salmap = cam(target,out)
+    cam.clear_hooks()
+    salmap = F.interpolate(salmap.unsqueeze(0).unsqueeze(0), size=(224, 224), mode='bilinear',
+                           align_corners=False)
+    print(salmap)
     #print('-----after generating salmap in run', time.time() - now,'\n')
     ##plt.figure()
     #plt.imshow(salmap.squeeze(0).squeeze(0))
@@ -66,12 +89,12 @@ for arg in sys.argv[1:]:
 chunk_id,chunk_dim=[int(x) for x in params]
 num_imgs = chunk_dim
 
-displacement=0
+displacement=2000
 
 print(num_imgs)
 p = ''
 root = './'  # '/tirocinio_tesi/Score-CAM000/Score-CAM'
-outpath_root = root + 'out/filter/'
+outpath_root = root + 'out/'
 data_root = root + 'ILSVRC2012_devkit_t12/data/'
 
 with open(data_root + 'IMAGENET_path.txt', 'r') as f:
@@ -94,47 +117,65 @@ GT = {}
 with open(data_root + 'imagenet_val_gts.txt', 'r') as f:
     GT = {get_name_images(x.split()[0]): [get_name_images(x.split()[0]) + ' ' + x.split()[2]] for x in f.read().strip().split('\n')}
 
+VGG_CONFIG = {_vgg: dict(input_layer='features', conv_layer='features')
+              for _vgg in models.vgg.__dict__.keys()}
+
+RESNET_CONFIG = {_resnet: dict(input_layer='conv1', conv_layer='layer4', fc_layer='fc')
+                 for _resnet in models.resnet.__dict__.keys()}
+
+DENSENET_CONFIG = {_densenet: dict(input_layer='features', conv_layer='features', fc_layer='classifier')
+                   for _densenet in models.densenet.__dict__.keys()}
+MODEL_CONFIG = {
+    **VGG_CONFIG, **RESNET_CONFIG, **DENSENET_CONFIG,
+    'mobilenet_v2': dict(input_layer='features', conv_layer='features')
+}
+
+
 
 #img_dict=IMUT.IMG_list(path=p,GT=GT,labs=labs).generate_random(num_imgs)
 base,window=chunk_id*chunk_dim+displacement,chunk_dim
 pattern='ILSVRC2012_val_********.JPEG'
-#img_list=get_n_imgs(range(base+1,base+window+1),pattern)
+img_list=get_n_imgs(range(base+1,base+window+1),pattern)
 
-with open('filter.txt','r') as f:
-    txt=f.read()
-img_list=[p.split()[0] for p in txt.strip().split('\n')[base:base+window]]
-img_list={get_num_img(p.split()[0]):p.split()[0] for p in img_list}
-
-#arch=EVMET.Architecture(models.resnet18(pretrained=True).eval(),'resnet18','layer4')
-arch=EVMET.Architecture(models.vgg16(pretrained=True).eval(),'vgg16','features_29')
+arch=EVMET.Architecture(models.resnet18(pretrained=True).eval(),'resnet18','layer4')
+#arch=EVMET.Architecture(models.vgg16(pretrained=True).eval(),'vgg16','features_29')
 
 avg_drop=ADIC.AverageDrop('average_drop',arch)
 inc_conf=ADIC.IncreaseInConfidence('increase_in_confidence',arch)
 deletion=DAI.Deletion('deletion',arch)
 insertion=DAI.Insertion('insertion',arch)
 
-img_dict = IMUT.IMG_list(path=p,outpath_root='out/filter/', GT=GT, labs=labs).select_imgs(img_list)
+img_dict = IMUT.IMG_list(path=p, GT=GT, labs=labs).select_imgs(img_list)
 
 em = EVMET.MetricsEvaluator(img_dict, saliency_map_extractor=run, model=arch,
                                 metrics=[avg_drop, inc_conf, deletion, insertion])
 start = time.time()
 now = start
 path0=img_dict.get_outpath_root()
-try:
-    os.mkdir(f'{path0}')
-except:
-    pass
 
-for c in CAMS.keys():
+conv_layer = MODEL_CONFIG[arch.name]['conv_layer']
+input_layer = MODEL_CONFIG[arch.name]['input_layer']
+fc_layer = MODEL_CONFIG[arch.name]['fc_layer']
+cam_extractors = [
+                      CAM(arch.arch, conv_layer, fc_layer),
+                      GradCAM(arch.arch, conv_layer),
+                      GradCAMpp(arch.arch, conv_layer),
+                      SmoothGradCAMpp(arch.arch, conv_layer, input_layer),
+                      ScoreCAM(arch.arch, conv_layer, input_layer),
+                      SSCAM(arch.arch, conv_layer, input_layer),
+                      ISSCAM(arch.arch, conv_layer, input_layer)
+                 ]
+for idx,c in enumerate([cam_extractors[4]]):
+    print(idx)
     try:
-        os.mkdir(f'{path0}{str(c)}/')
+        os.mkdir(f'{path0}vgg16_{str(c).split("(")[0]}/')
     except:
         pass
-    img_dict.set_outpath_root(f'{path0}{str(c)}/')
+    img_dict.set_outpath_root(f'{path0}vgg16_{str(c).split("(")[0]}/')
     print(img_dict.get_outpath_root())
     print(img_dict.get_img_dict())
 
-    M_res,m_res=em(CAMS[c])
+    M_res,m_res=em(c)
 
     print(f'Execution time: {int(time.time() - start)}s')
     print(f'In {num_imgs} images')

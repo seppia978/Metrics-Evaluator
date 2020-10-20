@@ -18,12 +18,11 @@ class Deletion(EVMET.MetricOnSingleExample):
         return self.res_list
 
     def update(self,*args):
-        img, out, em=args
+        img, Y_i_c, class_idx, em=args
         exp_map = em.clone()
         inp = img.clone()
-        Y_i_c = out.max(1)[0].item()
         self.res_list.append(Y_i_c)
-        class_idx = out.max(1)[-1].item()
+
         for _ in range(int(1/self.st)):
             inp, exp_map = remove_more_important_px(inp, exp_map, step=self.st)
             if torch.cuda.is_available():
@@ -50,11 +49,9 @@ class Insertion(EVMET.MetricOnSingleExample):
         return self.res_list
 
     def update(self, *args):
-        img, out, em = args
+        img, Y_i_c, class_idx, em=args
         exp_map = em.clone()
         inp = self.arch.apply_transform(torch.zeros(img.squeeze(0).shape))
-        class_idx = out.max(1)[-1].item()
-        Y_i_c = out.max(1)[0].item()
         self.res_list.append(Y_i_c)
         # print(img.mean(),inp.norm())
 

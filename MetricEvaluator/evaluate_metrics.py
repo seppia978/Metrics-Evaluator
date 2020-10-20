@@ -1,12 +1,34 @@
 import torch
 import torchvision.models as models
 import torch.nn.functional as FF
+import torchvision.transforms as transforms
+import torchvision.transforms.functional as F
 import os
+from PIL import Image
+import matplotlib.pyplot as plt
 
-from ScoreCAM.utils import *
+
+
+
+#from ScoreCAM.utils import *
+
+def load_image(image_path):
+    return Image.open(image_path).convert('RGB')
+
+def denormalize(tensor):
+    means = [0.485, 0.456, 0.406]
+    stds = [0.229, 0.224, 0.225]
+
+    denormalized = tensor.clone()
+
+    for channel, mean, std in zip(denormalized[0], means, stds):
+        channel.mul_(std).add_(mean)
+
+    return denormalized
 
 
 from utils_functions import plot
+#import time as tt
 
 def list_metrics(em):
     return em.__list_metrics__()
@@ -187,7 +209,7 @@ class MetricsEvaluator:
 
     # EVALUATE METRICS
     def get_explanation_map(self,*params,img=None,target=None):
-        return self.saliency_map_extractor(*params,arch=self.model, img=img,target=target)
+        return self.saliency_map_extractor(*params,arch=self.model, img=img, target=target)
 
     def evaluate_metrics(self,*params):#,**kwargs):
         img_dict, saliency_map_extractor, model, metrics, times=self.img_dict,self.saliency_map_extractor,self.model,self.metrics,self.times
@@ -224,19 +246,26 @@ class MetricsEvaluator:
                     if torch.cuda.is_available():
                         inp = inp.cuda()
                     #print(f'Before test.run: {round(time.time() - now, 0)}s')
-
-                    with torch.no_grad():
-                        out = FF.softmax(arch(inp), dim=1)
-
+                    #st=tt.time()
+                    #now=st
+                    arch.zero_grad()
+                    out = FF.softmax(arch(inp),dim=1)
+                    #print('passaggio forward n 1',tt.time()-now,'\n')
+                    #now=tt.time()
                     # Get class idx for this img
+                    Y_i_c = out.max(1)[0].item()
                     class_idx = out.max(1)[-1].item()
                     class_name = labs[str(class_idx)]
                     gt_name = GT[str(img[-13:-5])][0].split()[1]
 
                     # Get explanation map using the explanation method defined when creating the object
-                    saliency_map=self.get_explanation_map(*params,img=f'{img_dict.get_path()}/{img}',target=class_idx)
-                    out,saliency_map=out.detach(),saliency_map#.detach()
-                    F.to_pil_image(saliency_map.squeeze(0)).save(f'{outpath}/exp_map.png')
+                    saliency_map=self.get_explanation_map(*params,img=inp,target=class_idx)
+                    #print('Saliency map extraction',tt.time() - now,'\n')
+                    #now = tt.time()
+
+                    out,saliency_map=FF.softmax(out,dim=1).detach(),saliency_map#.detach()
+
+                    F.to_pil_image(saliency_map.squeeze(0).cpu()).save(f'{outpath}/exp_map.png')
                     #print(f'After test.run: {round(time.time() - now, 0)}s')
                     if torch.cuda.is_available():
                         saliency_map = saliency_map.cuda()
@@ -254,30 +283,38 @@ class MetricsEvaluator:
                     # Updates ad plots of the metrics on a single example
                     Y=[]
                     L=[]
-
                     plt.figure()
                     plt.imshow(denormalize(inp*saliency_map).squeeze(0).cpu().detach().permute(1,2,0).numpy())
                     plt.savefig(f'{outpath}/inp*sal.png')
+                    #print('before evaluations',tt.time() - now,'\n')
+                    #now = tt.time()
                     for c,m in enumerate(m_res):
-                        m.update(inp,out,saliency_map)
+                        m.update(inp,Y_i_c,class_idx,saliency_map)
                         m.final_step()
                         print(f'The final {m.get_name()} score is {m.get_result()}')
                         #print(m.get_res_list())
                         Y.append(m.get_res_list())
                         L.append((m.get_name(),m.get_result()))
                         m.clear_list()
+                        #print(f'afetr {m.name}',tt.time() - now,'\n')
+                        #now = tt.time()
                     plot(torch.arange(0, 1, 1 / precision), Y,
                          label=L,
                          path=f'{outpath}plot_{k}.png',
                          title=f'label={class_name}, GT={gt_name}')
                     for c,M in enumerate(M_res):
-                        M.update(inp,out,saliency_map)
+                        M.update(inp,Y_i_c,class_idx,saliency_map)
+                        #print(f'afetr {M.name}',tt.time() - now,'\n')
+                        #now = tt.time()
                     #print(f'After one img: {int(time.time() - now)}s')
                     #now = time.time()
 
         for M in M_res:
             M.final_step(num_imgs)
+        #print(f'after {M.name} final step',tt.time() - now,'\n')
+        #now = tt.time()
         return M_res,m_res
 
 
-
+    def __call__(self,*params):
+        return self.evaluate_metrics(*params)

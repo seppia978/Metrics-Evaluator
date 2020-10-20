@@ -16,8 +16,8 @@ def run(i=0,arch=None,path='out/', img=None, target=None):
       alexnet_model_dict = dict(type='alexnet', arch=alexnet, layer_name='features_10',input_size=(224, 224))
       alexnet_scorecam = ScoreCAM(alexnet_model_dict)
 
-      input_image = load_image(img)
-      input_ = apply_transforms(input_image)
+      #input_image = load_image(img)
+      input_ = img#apply_transforms(input_image)
       if torch.cuda.is_available():
         input_ = input_.cuda()
 
@@ -36,9 +36,8 @@ def run(i=0,arch=None,path='out/', img=None, target=None):
 
       vgg_scorecam = ScoreCAM(vgg_model_dict)
 
-      input_image = load_image(img)
-
-      input_ = apply_transforms(input_image)
+      # input_image = load_image(img)
+      input_ = img  # apply_transforms(input_image)
 
       if torch.cuda.is_available():
         input_ = input_.cuda()
@@ -60,8 +59,9 @@ def run(i=0,arch=None,path='out/', img=None, target=None):
       resnet_model_dict = dict(type='resnet18', arch=resnet, layer_name='layer4',input_size=(224, 224))
       resnet_scorecam = ScoreCAM(resnet_model_dict)
 
-      input_image = load_image(img)
-      input_ = apply_transforms(input_image)
+      # input_image = load_image(img)
+      input_ = img  # apply_transforms(input_image)
+
       if torch.cuda.is_available():
         input_ = input_.cuda()
       out=resnet(input_)

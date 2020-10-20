@@ -2,7 +2,7 @@ import ast
 
 CAMS={'ScoreCAM':0,'GradCAM':0,'GradCAM++':0}
 
-with open('out/output.txt','r') as f:
+with open('out/filter/output.txt','r') as f:
     txt=f.read().split('\n')
 
 lst=[]
@@ -12,6 +12,9 @@ for row in txt[:-1]:
 avgdrop,incinconf,delt,inst=[[0 for _ in CAMS] for _ in range(4)]
 
 l=[]
+lst=lst[4:]
+visu=2
+lst=lst[int(len(lst)/2):] if visu == 2 else lst[:int(len(lst)/2)]
 for d in lst:
   val=list(d.values())
   cam=list(d.keys())[0][1]
@@ -22,12 +25,14 @@ for d in lst:
   delt[list(CAMS.keys()).index(cam)] += float(val[0][1][0])
   inst[list(CAMS.keys()).index(cam)] += float(val[0][1][1])
 
-print(avgdrop)
+print('\n------------------------------------------------------------------------------------------------------------------------')
+print('\n\n\t\t| Average Drop\t\t| Increase In Confidence\t| Deletion\t\t| Insertion')
 for c in CAMS:
     print(f'''
-    \n-----------------------------------------------------------------------------\n
-    {c}\t|[ {avgdrop[list(CAMS.keys()).index(c)]/CAMS[c]}\t| {incinconf[list(CAMS.keys()).index(c)]/CAMS[c]}\t| {delt[list(CAMS.keys()).index(c)]/CAMS[c]}\t| {inst[list(CAMS.keys()).index(c)]/CAMS[c]}]
+    \n------------------------------------------------------------------------------------------------------------------------\n
+    {c}\t| {round(avgdrop[list(CAMS.keys()).index(c)]/CAMS[c],2):.2f}%\t\t| {round(incinconf[list(CAMS.keys()).index(c)]/CAMS[c],2):.2f}%\t\t\t| {round(delt[list(CAMS.keys()).index(c)]/CAMS[c],3):.3f}\t\t\t| {round(inst[list(CAMS.keys()).index(c)]/CAMS[c],3):.3f}
      ''')
+print('\n------------------------------------------------------------------------------------------------------------------------s')
 #for x in l:
 #    print(x[1])
 #    input()
