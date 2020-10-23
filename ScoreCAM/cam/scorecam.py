@@ -25,7 +25,7 @@ class ScoreCAM(BaseCAM):
             predicted_class = torch.LongTensor([class_idx])
             score = logit[:, class_idx].squeeze()
         
-        logit = F.softmax(logit)
+        logit = F.softmax(logit,dim=1)
 
         if torch.cuda.is_available():
           predicted_class= predicted_class.cuda()

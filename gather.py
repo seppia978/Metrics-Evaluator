@@ -1,6 +1,6 @@
 import ast
 
-CAMS={'ScoreCAM':0,'GradCAM':0,'GradCAM++':0}
+CAMS={'CAM':0,'GradCAM':0,'GradCAM++':0,'SmoothGradCAM++':0,'ScoreCAM':0,'SSCAM':0,'ISSCAM':0}
 
 with open('out/filter/output.txt','r') as f:
     txt=f.read().split('\n')
@@ -12,9 +12,10 @@ for row in txt[:-1]:
 avgdrop,incinconf,delt,inst=[[0 for _ in CAMS] for _ in range(4)]
 
 l=[]
-lst=lst[4:]
-visu=2
-lst=lst[int(len(lst)/2):] if visu == 2 else lst[:int(len(lst)/2)]
+#lst=lst[4:]
+#visu=2
+#lst=lst[int(len(lst)/2):] if visu == 2 else lst[:int(len(lst)/2)]
+
 for d in lst:
   val=list(d.values())
   cam=list(d.keys())[0][1]

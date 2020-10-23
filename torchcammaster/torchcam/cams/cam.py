@@ -51,7 +51,10 @@ class _CAM(object):
     def _normalize(cams):
         """CAM normalization"""
         cams -= cams.flatten(start_dim=-2).min(-1).values.unsqueeze(-1).unsqueeze(-1)
-        cams /= cams.flatten(start_dim=-2).max(-1).values.unsqueeze(-1).unsqueeze(-1)
+        cams_flatten_max_nonzero = cams.flatten(start_dim=-2).max(-1).values.unsqueeze(-1).unsqueeze(-1)
+        cams_flatten_max_nonzero = torch.where(cams_flatten_max_nonzero != 0, cams_flatten_max_nonzero,
+                                               torch.tensor(10e-8).to(device=cams_flatten_max_nonzero.device))
+        cams /= cams_flatten_max_nonzero
 
         return cams
 
@@ -77,15 +80,15 @@ class _CAM(object):
         if self._score_used and not isinstance(scores, torch.Tensor):
             raise ValueError("model output scores is required to be passed to compute CAMs")
 
-    def __call__(self, class_idx, scores=None, normalized=True):
+    def __call__(self, class_idx, inp, scores=None, normalized=True):
 
         # Integrity check
         self._precheck(class_idx, scores)
 
         # Compute CAM
-        return self.compute_cams(class_idx, scores, normalized)
+        return self.compute_cams(class_idx, inp, scores, normalized)
 
-    def compute_cams(self, class_idx, scores=None, normalized=True):
+    def compute_cams(self, class_idx, inp, scores=None, normalized=True):
         """Compute the CAM for a specific output class
 
         Args:
@@ -110,6 +113,9 @@ class _CAM(object):
         if normalized:
             batch_cams = self._normalize(batch_cams)
 
+        _, _, h, w = inp.shape
+        batch_cams = F.interpolate(batch_cams.unsqueeze(0).unsqueeze(0), size=(h, w), mode='bilinear',
+                                   align_corners=False)
         return batch_cams
 
     def __repr__(self):

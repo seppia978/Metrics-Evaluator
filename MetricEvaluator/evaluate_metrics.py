@@ -208,8 +208,8 @@ class MetricsEvaluator:
         self.metrics.append(Metric(name,func))
 
     # EVALUATE METRICS
-    def get_explanation_map(self,*params,img=None,target=None):
-        return self.saliency_map_extractor(*params,arch=self.model, img=img, target=target)
+    def get_explanation_map(self,*params,img=None,out=None,target=None):
+        return self.saliency_map_extractor(*params,arch=self.model, img=img, out=out, target=target)
 
     def evaluate_metrics(self,*params):#,**kwargs):
         img_dict, saliency_map_extractor, model, metrics, times=self.img_dict,self.saliency_map_extractor,self.model,self.metrics,self.times
@@ -259,7 +259,7 @@ class MetricsEvaluator:
                     gt_name = GT[str(img[-13:-5])][0].split()[1]
 
                     # Get explanation map using the explanation method defined when creating the object
-                    saliency_map=self.get_explanation_map(*params,img=inp,target=class_idx)
+                    saliency_map=self.get_explanation_map(*params,img=inp,out=out,target=class_idx)
                     #print('Saliency map extraction',tt.time() - now,'\n')
                     #now = tt.time()
 
