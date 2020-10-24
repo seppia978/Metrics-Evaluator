@@ -26,14 +26,18 @@ for d in lst:
   delt[list(CAMS.keys()).index(cam)] += float(val[0][1][0])
   inst[list(CAMS.keys()).index(cam)] += float(val[0][1][1])
 
-print('\n------------------------------------------------------------------------------------------------------------------------')
-print('\n\n\t\t| Average Drop\t\t| Increase In Confidence\t| Deletion\t\t| Insertion')
+print('\n----------------------------------------------------------------------------------------------------------------------------')
+print('\n\t\t\t| Average Drop\t\t| Increase In Confidence\t| Deletion\t\t| Insertion')
 for c in CAMS:
+    key=c
+    if len(key)<5:
+        key+='\t\t'
+    elif len(key)<12:
+        key+='\t'
     print(f'''
-    \n------------------------------------------------------------------------------------------------------------------------\n
-    {c}\t| {round(avgdrop[list(CAMS.keys()).index(c)]/CAMS[c],2):.2f}%\t\t| {round(incinconf[list(CAMS.keys()).index(c)]/CAMS[c],2):.2f}%\t\t\t| {round(delt[list(CAMS.keys()).index(c)]/CAMS[c],3):.3f}\t\t\t| {round(inst[list(CAMS.keys()).index(c)]/CAMS[c],3):.3f}
-     ''')
-print('\n------------------------------------------------------------------------------------------------------------------------s')
+    ------------------------------------------------------------------------------------------------------------------------\n
+    {key}\t| {round(avgdrop[list(CAMS.keys()).index(c)]/CAMS[c],2):.2f}%\t\t| {round(incinconf[list(CAMS.keys()).index(c)]/CAMS[c],2):.2f}%\t\t\t| {round(delt[list(CAMS.keys()).index(c)]/CAMS[c],3):.3f}\t\t\t| {round(inst[list(CAMS.keys()).index(c)]/CAMS[c],3):.3f}''')
+print('\n----------------------------------------------------------------------------------------------------------------------------')
 #for x in l:
 #    print(x[1])
 #    input()
