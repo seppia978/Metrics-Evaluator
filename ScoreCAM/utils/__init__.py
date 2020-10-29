@@ -432,6 +432,8 @@ def find_vgg_layer(arch, target_layer_name):
     if len(hierarchy) == 2:
         target_layer = target_layer[int(hierarchy[1])]
 
+    print(target_layer)
+
     return target_layer
 
 

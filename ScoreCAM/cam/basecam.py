@@ -65,6 +65,7 @@ class BaseCAM(object):
             self.activations['value'] = output.cuda()
         else:
             self.activations['value'] = output
+
         return None
 
     def __call__(self, input, class_idx=None, retain_graph=False):

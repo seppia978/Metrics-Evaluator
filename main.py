@@ -4,11 +4,29 @@ import metrics.average_drop_and_increase_of_confidence as ADIC
 import metrics.deletion_and_insertion as DAI
 import torchvision.models as models
 import torch
-from ScoreCAM import test
+from ScoreCAM.cam.scorecam import ScoreCAM
 import sys
 import time
 import os
 
+def run(*params,arch, img, out, target):
+    #st=time.time()
+    #now=st
+    model = arch
+
+    #print('-----first in run', time.time()-now,'\n')
+    #scores = model.arch(input)
+    cam=ScoreCAM(dict(type=model.name, arch=model.arch, layer_name=model.layer,input_size=(224, 224)))
+    #print('-----after creating object in run', time.time() - now,'\n')
+    salmap = cam(img,target)
+    #cam.clear_hooks()
+    #print(salmap)
+    #print('-----after generating salmap in run', time.time() - now,'\n')
+    ##plt.figure()
+    #plt.imshow(salmap.squeeze(0).squeeze(0))
+    #plt.savefig(f'result{str(cam)}.png')
+
+    return salmap
 
 def get_name_images(s):
     return str(s)[-13:-5]
@@ -97,7 +115,7 @@ inc_conf=ADIC.IncreaseInConfidence('increase_in_confidence',arch)
 deletion=DAI.Deletion('deletion',arch)
 insertion=DAI.Insertion('insertion',arch)
 
-em=EVMET.MetricsEvaluator(img_dict, saliency_map_extractor=test.run, model=arch, metrics=[avg_drop, inc_conf, deletion, insertion])
+em=EVMET.MetricsEvaluator(img_dict, saliency_map_extractor=run, model=arch, metrics=[avg_drop, inc_conf, deletion, insertion])
 
 start = time.time()
 now = start

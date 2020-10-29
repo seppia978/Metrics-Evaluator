@@ -8,6 +8,8 @@ CAM
 import math
 import torch
 import torch.nn.functional as F
+from torchcammaster.torchcam.utils import find_alexnet_layer, find_vgg_layer, find_resnet_layer, find_densenet_layer, \
+    find_squeezenet_layer, find_layer, find_googlenet_layer, find_mobilenet_layer, find_shufflenet_layer
 
 __all__ = ['CAM', 'ScoreCAM', 'SSCAM', 'ISSCAM']
 
@@ -25,11 +27,35 @@ class _CAM(object):
 
     def __init__(self, model, conv_layer):
 
-        if not hasattr(model, conv_layer):
-            raise ValueError(f"Unable to find submodule {conv_layer} in the model")
-        self.model = model
+        #if not hasattr(model, conv_layer):
+        #    raise ValueError(f"Unable to find submodule {conv_layer} in the model")
+        self.model = model.arch
+
         # Forward hook
-        self.hook_handles.append(self.model._modules.get(conv_layer).register_forward_hook(self._hook_a))
+        model_type=model.name
+        layer_name=model.layer
+        if 'vgg' in model_type.lower():
+            self.conv_layer = find_vgg_layer(self.model, layer_name)
+        elif 'resnet' in model_type.lower():
+            self.conv_layer = find_resnet_layer(self.model, layer_name)
+        elif 'densenet' in model_type.lower():
+            self.conv_layer = find_densenet_layer(self.model, layer_name)
+        elif 'alexnet' in model_type.lower():
+            self.conv_layer = find_alexnet_layer(self.model, layer_name)
+        elif 'squeezenet' in model_type.lower():
+            self.conv_layer = find_squeezenet_layer(self.model, layer_name)
+        elif 'googlenet' in model_type.lower():
+            self.conv_layer = find_googlenet_layer(self.model, layer_name)
+        elif 'shufflenet' in model_type.lower():
+            self.conv_layer = find_shufflenet_layer(self.model, layer_name)
+        elif 'mobilenet' in model_type.lower():
+            self.conv_layer = find_mobilenet_layer(self.model, layer_name)
+        else:
+            self.conv_layer = find_layer(self.model, layer_name)
+        #print(self.model,self.model._modules.get(conv_layer),conv_layer)
+
+        #self.hook_handles.append(self.model._modules.get(conv_layer).register_forward_hook(self._hook_a))
+        self.hook_handles.append(self.conv_layer.register_forward_hook(self._hook_a))
         # Enable hooks
         self._hooks_enabled = True
         # Should ReLU be used before normalization
@@ -128,7 +154,7 @@ class _CAM(object):
         # Normalize the CAM
         if normalized:
             batch_cams = self._normalize(batch_cams)
-        print(batch_cams.shape)
+
         return batch_cams
 
     def __repr__(self):
@@ -168,10 +194,15 @@ class CAM(_CAM):
     hook_handles = []
 
     def __init__(self, model, conv_layer, fc_layer):
+        print(fc_layer,type(fc_layer))
 
         super().__init__(model, conv_layer)
         # Softmax weight
-        self._fc_weights = self.model._modules.get(fc_layer).weight.data
+        if model.name=='vgg16':
+            self._fc_weights=self.model.classifier[6].weight.data
+        else:
+            self._fc_weights = self.model._modules.get(fc_layer).weight.data
+            print(fc_layer, self.model._modules.get(fc_layer))
 
     def _get_weights(self, class_idx, scores=None):
         """Computes the weight coefficients of the hooked activation maps"""

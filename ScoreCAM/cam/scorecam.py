@@ -63,7 +63,8 @@ class ScoreCAM(BaseCAM):
               score = output[0][predicted_class]
 
               score_saliency_map +=  score * saliency_map
-                
+
+
         score_saliency_map = F.relu(score_saliency_map)
         score_saliency_map_min, score_saliency_map_max = score_saliency_map.min(), score_saliency_map.max()
 

@@ -30,8 +30,9 @@ class _GradCAM(_CAM):
         self._relu = True
         # Model output is used by the extractor
         self._score_used = True
+
         # Backward hook
-        self.hook_handles.append(self.model._modules.get(conv_layer).register_backward_hook(self._hook_g))
+        self.hook_handles.append(self.conv_layer.register_backward_hook(self._hook_g))
 
     def _hook_g(self, module, input, output):
         """Gradient hook"""
