@@ -4,14 +4,14 @@ import metrics.average_drop_and_increase_of_confidence as ADIC
 import metrics.deletion_and_insertion as DAI
 import torchvision.models as models
 import torch
-from SSCAM.cam.sscam import SSCAM1 as SSCAM
+from SSCAM.cam.sscam import SSCAM2 as SSCAM
 import sys
 import time
 import os
 import PIL.Image as Image
 CAMS={'SSCAM':SSCAM}
 
-def run(*params, arch, img, target):
+def run(*params, arch, img, out, target):
     CAM = params[0]
     input = img
     model = arch

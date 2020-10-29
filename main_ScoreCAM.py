@@ -19,7 +19,7 @@ CAMS={'GradCAM':GradCAM,'GradCAM++':GradCAMpp}
 
 
 
-def run(*params,arch, img, target):
+def run(*params,arch, img, out,target):
     #st=time.time()
     #now=st
     CAM=params[0]

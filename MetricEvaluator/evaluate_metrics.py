@@ -225,7 +225,7 @@ class MetricsEvaluator:
 
         if metrics is not []:
             for _ in range(times):
-                m_res=[m for m in metrics if m.is_all_dataset() is not True]
+                m_res = [m for m in metrics if m.is_all_dataset() is not True]
                 M_res = [m for m in metrics if m.is_all_dataset()]
 
                 # For each image

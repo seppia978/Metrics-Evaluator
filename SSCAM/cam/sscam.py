@@ -1,7 +1,10 @@
 import torch
 import numpy as np
+import math
 import torch.nn.functional as F
 from SSCAM.cam.basecam import *
+from torch.autograd import Variable
+import time
 
 class SSCAM1(BaseCAM):
 
@@ -25,7 +28,7 @@ class SSCAM1(BaseCAM):
             predicted_class = torch.LongTensor([class_idx])
             score = logit[:, class_idx].squeeze()
         
-        logit = F.softmax(logit)
+        logit = F.softmax(logit,dim=1)
 
         if torch.cuda.is_available():
           predicted_class= predicted_class.cuda()
@@ -72,15 +75,17 @@ class SSCAM1(BaseCAM):
               
               # Adding noise to the upsampled activation map `x`
               for _ in range(param_n):
-                noise=torch.normal(mean,sigma**2,x.size()).cuda()
-                #noise = Variable(x.data.new(x.size()).normal_(mean, sigma**2))
+                #noise=torch.normal(mean,sigma**2,x.size()).cuda()
+                noise = Variable(x.data.new(x.size()).normal_(mean, sigma**2))
                 
                 noisy_img = x + noise
 
                 noisy_list.append(noisy_img)
+
+                print((noisy_img * input).shape)
                
                 output = self.model_arch(noisy_img * input)
-                output = F.softmax(output)
+                output = F.softmax(output,dim=1)
                 score = output[0][predicted_class]
                 score_list.append(score)
               
@@ -125,7 +130,7 @@ class SSCAM2(BaseCAM):
             predicted_class = torch.LongTensor([class_idx])
             score = logit[:, class_idx].squeeze()
         
-        logit = F.softmax(logit)
+        logit = F.softmax(logit,dim=1)
 
         if torch.cuda.is_available():
             predicted_class= predicted_class.cuda()
@@ -147,53 +152,112 @@ class SSCAM2(BaseCAM):
         mean = 0
         param_n = 35
         param_sigma_multiplier = 2
-        
 
+        now = time.time()
+
+        size = list(input.shape)
+        size[0] = param_n
+        noisy_list = torch.zeros(size).cuda()
+        for i in range(param_n):
+            noisy_list[i, :] = Variable(input.data.new(input.size()).normal_(mean, sigma ** 2))
+
+        bs=32
         with torch.no_grad():
-          for i in range(k):
+            for i in range(math.ceil(k/bs)):
+                selection_slice = slice(i * bs, min((i + 1) * bs, k))
+                print('0', time.time() - now)
+                now=time.time()
+                start=now
 
-              # upsampling
-              saliency_map = torch.unsqueeze(activations[:, i, :, :], 1)
-              
-              saliency_map = F.interpolate(saliency_map, size=(h, w), mode='bilinear', align_corners=False)
+                # upsampling
+                saliency_map = activations.permute(1,0,2,3)[selection_slice, :, :, :]
+                print('1', time.time() - now)
+                now = time.time()
 
-              if saliency_map.max() == saliency_map.min():
-                continue
 
-              # Normalization
-              norm_saliency_map = (saliency_map - saliency_map.min()) / (saliency_map.max() - saliency_map.min())
+                print(activations.shape,saliency_map.shape,selection_slice)
+                saliency_map = F.interpolate(saliency_map, size=(h, w), mode='bilinear', align_corners=False)
+                now-=time.time()
+                print('2', now)
+                now = time.time()
 
-              x = input * norm_saliency_map              
+                m, M = saliency_map.min(), saliency_map.max()
+                if m == M:
+                    print('FUCKKKK')
+                    continue
 
-              if (torch.max(x) - torch.min(x)).item() == 0:
-                continue
-              else:
-                sigma = param_sigma_multiplier / (torch.max(x) - torch.min(x)).item()
-              
-              score_list = []
-              noisy_list = []
+                # Normalization
+                norm_saliency_map = (saliency_map - m)/(M - m)
 
-              # Adding noise to the normalized input mask `x`
-              for i in range(param_n):
-                noise = torch.normal(mean, sigma ** 2, x.size()).cuda()
-                # noise = Variable(x.data.new(x.size()).normal_(mean, sigma**2))
+                now = time.time()-now
+                print('3', now)
+                now = time.time()
+
+                print(input.shape,norm_saliency_map.shape)
+                x = input * norm_saliency_map
+                now -= time.time()
+                print('4', now)
+                now = time.time()
+
+
+                if (torch.max(x) - torch.min(x)).item() == 0:
+                    continue
+                else:
+                    sigma = param_sigma_multiplier / (torch.max(x) - torch.min(x)).item()
+                now -= time.time()
+                print('5', now)
+                now = time.time()
+
+                size=list(x.shape)
+                size[0]=param_n
+                score_list = torch.zeros(param_n).cuda()
+
+                # Adding noise to the normalized input mask `x`
+                noisy_list,x=noisy_list.unsqueeze(1),x.unsqueeze(0)
+                print(noisy_list.shape,x.shape)
+                noisy_input=noisy_list+x
+                noisy_input=noisy_input.cuda()
+
+                output = F.softmax(self.model_arch(noisy_input),dim=1)
+
+                score_list = output[:,predicted_class]
+
+                now -= time.time()
+                print('6', now)
+                now = time.time()
+                #score_list[i]=score
+
+                #print(noisy_list,noisy_list.shape)
+                '''
+                for i in range(param_n):
+                    noise = Variable(x.data.new(x.size()).normal_(mean, sigma**2))
+
+                    noisy_img = x + noise 
+
+                    noisy_list.append(noisy_img)
+
+                    noisy_img = noisy_img.cuda()
+
+                    output = self.model_arch(noisy_img)
+
+                    output = F.softmax(output,dim=1)
+
+                    score = output[0][predicted_class]
+
+                    score_list.append(score)
+                '''
+                # Averaging the scores to introduce smoothing
+                #score = sum(score_list) / len(score_list)
+                score=score_list.max()
+                now -= time.time()
+                print('6.5', now)
+                now = time.time()
+                score_saliency_map +=  score * saliency_map
+                print('7', time.time() - now, time.time()-start)
+                now = time.time()
                 
-                noisy_img = x + noise
-
-                noisy_list.append(noisy_img)
-                
-                noisy_img = noisy_img.cuda()
-                output = self.model_arch(noisy_img)
-                output = F.softmax(output)
-                score = output[0][predicted_class]
-                score_list.append(score)
-
-              # Averaging the scores to introduce smoothing               
-              score = sum(score_list) / len(score_list)
-              score_saliency_map +=  score * saliency_map
-                
-        score_saliency_map = F.relu(score_saliency_map)
-        score_saliency_map_min, score_saliency_map_max = score_saliency_map.min(), score_saliency_map.max()
+            score_saliency_map = F.relu(score_saliency_map)
+            score_saliency_map_min, score_saliency_map_max = score_saliency_map.min(), score_saliency_map.max()
 
         if score_saliency_map_min == score_saliency_map_max:
             return None

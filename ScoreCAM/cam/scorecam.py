@@ -59,7 +59,7 @@ class ScoreCAM(BaseCAM):
               # how much increase if keeping the highlighted region
               # predication on masked input
               output = self.model_arch(input * norm_saliency_map)
-              output = F.softmax(output)
+              output = F.softmax(output,dim=1)
               score = output[0][predicted_class]
 
               score_saliency_map +=  score * saliency_map

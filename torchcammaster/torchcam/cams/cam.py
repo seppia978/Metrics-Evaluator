@@ -99,12 +99,28 @@ class _CAM(object):
         Returns:
             torch.Tensor[M, N]: class activation map of hooked conv layer
         """
+        '''
+        _, _, h, w = inp.shape
+        tmp=torch.zeros((self.hook_a.shape[1],h,w))
+        for i in range(self.hook_a.shape[1]):
+            print(self.hook_a.shape[1],self.hook_a[:,i,:,:].unsqueeze(0).shape)
+            tmp[i,:]=F.interpolate(self.hook_a[:,i,:,:].unsqueeze(0), size=(h, w), mode='bilinear',
+                                   align_corners=False)
 
+        self.hook_a=tmp
+        '''
         # Get map weight
         weights = self._get_weights(class_idx, scores)
 
+        # Normalize the activation
+        upsampled_a = self._normalize(self.hook_a)
+
+        #  Upsample it to input_size
+        # 1 * O * M * N
+        upsampled_a = F.interpolate(upsampled_a, inp.shape[-2:], mode='bilinear', align_corners=False)
+
         # Perform the weighted combination to get the CAM
-        batch_cams = (weights.unsqueeze(-1).unsqueeze(-1) * self.hook_a.squeeze(0)).sum(dim=0)
+        batch_cams = (weights.unsqueeze(-1).unsqueeze(-1) * upsampled_a.squeeze(0)).sum(dim=0)
 
         if self._relu:
             batch_cams = F.relu(batch_cams, inplace=True)
@@ -112,10 +128,7 @@ class _CAM(object):
         # Normalize the CAM
         if normalized:
             batch_cams = self._normalize(batch_cams)
-
-        _, _, h, w = inp.shape
-        batch_cams = F.interpolate(batch_cams.unsqueeze(0).unsqueeze(0), size=(h, w), mode='bilinear',
-                                   align_corners=False)
+        print(batch_cams.shape)
         return batch_cams
 
     def __repr__(self):
@@ -344,8 +357,8 @@ class SSCAM(ScoreCAM):
 
             # Process by chunk (GPU RAM limitation)
             for idx in range(math.ceil(weights.shape[0] / self.bs)):
-
                 selection_slice = slice(idx * self.bs, min((idx + 1) * self.bs, weights.shape[0]))
+
                 with torch.no_grad():
                     # Get the softmax probabilities of the target class
                     weights[selection_slice] += F.softmax(self.model(noisy_m[selection_slice]), dim=1)[:, class_idx]

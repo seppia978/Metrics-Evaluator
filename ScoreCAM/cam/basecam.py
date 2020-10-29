@@ -26,19 +26,7 @@ class BaseCAM(object):
         self.gradients = dict()
         self.activations = dict()
 
-        def backward_hook(module, grad_input, grad_output):
-            if torch.cuda.is_available():
-              self.gradients['value'] = grad_output[0].cuda()
-            else:
-              self.gradients['value'] = grad_output[0]
-            return None
 
-        def forward_hook(module, input, output):
-            if torch.cuda.is_available():
-              self.activations['value'] = output.cuda()
-            else:
-              self.activations['value'] = output
-            return None
 
         if 'vgg' in model_type.lower():
             self.target_layer = find_vgg_layer(self.model_arch, layer_name)
@@ -59,10 +47,24 @@ class BaseCAM(object):
         else:
             self.target_layer = find_layer(self.model_arch, layer_name)
 
-        self.target_layer.register_forward_hook(forward_hook)
-        self.target_layer.register_backward_hook(backward_hook)
+        self.target_layer.register_forward_hook(self.forward_hook)
+        self.target_layer.register_backward_hook(self.backward_hook)
 
     def forward(self, input, class_idx=None, retain_graph=False):
+        return None
+
+    def backward_hook(self,module, grad_input, grad_output):
+        if torch.cuda.is_available():
+            self.gradients['value'] = grad_output[0].cuda()
+        else:
+            self.gradients['value'] = grad_output[0]
+        return None
+
+    def forward_hook(self,module, input, output):
+        if torch.cuda.is_available():
+            self.activations['value'] = output.cuda()
+        else:
+            self.activations['value'] = output
         return None
 
     def __call__(self, input, class_idx=None, retain_graph=False):

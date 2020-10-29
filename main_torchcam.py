@@ -142,8 +142,8 @@ try:
 except:
     pass
 
-arch=EVMET.Architecture(models.resnet18(pretrained=True).eval(),'resnet18','layer4')
-#arch=EVMET.Architecture(models.vgg16(pretrained=True).eval(),'vgg16','features_29')
+#arch=EVMET.Architecture(models.resnet18(pretrained=True).eval(),'resnet18','layer4')
+arch=EVMET.Architecture(models.vgg16(pretrained=True).eval(),'vgg16','features_29')
 
 avg_drop=ADIC.AverageDrop('average_drop',arch)
 inc_conf=ADIC.IncreaseInConfidence('increase_in_confidence',arch)
@@ -160,17 +160,17 @@ path0=img_dict.get_outpath_root()
 
 conv_layer = MODEL_CONFIG[arch.name]['conv_layer']
 input_layer = MODEL_CONFIG[arch.name]['input_layer']
-fc_layer = MODEL_CONFIG[arch.name]['fc_layer']
+#fc_layer = MODEL_CONFIG[arch.name]['fc_layer']
 cam_extractors = {
-                      'CAM':CAM(arch.arch, conv_layer, fc_layer),
-                      'GradCAM':GradCAM(arch.arch, conv_layer),
-                      'GradCAM++':GradCAMpp(arch.arch, conv_layer),
-                      'SmoothGradCAM++':SmoothGradCAMpp(arch.arch, conv_layer, input_layer),
-                      'ScoreCAM':ScoreCAM(arch.arch, conv_layer, input_layer),
-                      'SSCAM':SSCAM(arch.arch, conv_layer, input_layer),
-                      'ISSCAM':ISSCAM(arch.arch, conv_layer, input_layer)
+                      #'CAM':CAM(arch.arch, conv_layer, fc_layer),
+                      #'GradCAM':GradCAM(arch.arch, conv_layer),
+                      #'GradCAM++':GradCAMpp(arch.arch, conv_layer),
+                      #'SmoothGradCAM++':SmoothGradCAMpp(arch.arch, conv_layer, input_layer),
+                      'ScoreCAM':ScoreCAM(arch.arch, conv_layer, input_layer)
+                      #'SSCAM':SSCAM(arch.arch, conv_layer, input_layer),
+                      #'ISSCAM':ISSCAM(arch.arch, conv_layer, input_layer)
                  }
-for idx,c in enumerate(cam_extractors.keys()):
+for idx,c in enumerate([list(cam_extractors.keys())[0]]):
     try:
         os.mkdir(f'{path0}{str(c)}/')
     except:
