@@ -148,13 +148,14 @@ class GradCAM(CAM):
         self.model.zero_grad()
 
         score[0, idx].backward(retain_graph=True)
-
         activations = values.activations
         gradients = values.gradients
+
         n, c, _, _ = gradients.shape
         alpha = gradients.view(n, c, -1).mean(2)
         alpha = alpha.view(n, c, 1, 1)
 
+        print(activations.max())
         # shape => (1, 1, H', W')
         cam = (alpha * activations).sum(dim=1, keepdim=True)
         cam = F.relu(cam)
@@ -196,7 +197,7 @@ class GradCAMpp(CAM):
             print("predicted class ids {}\t probability {}".format(idx, prob))
 
         # caluculate cam of the predicted class
-        cam = self.getGradCAMpp(self.values, score, idx)
+        cam = self.getGradCAMpp(self.values, prob, idx)
 
         _, _, h, w = x.shape
         cam = F.interpolate(cam, size=(h, w), mode='bilinear', align_corners=False)

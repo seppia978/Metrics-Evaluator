@@ -138,6 +138,7 @@ class _CAM(object):
         # Get map weight
         weights = self._get_weights(class_idx, scores)
 
+
         # Normalize the activation
         upsampled_a = self._normalize(self.hook_a)
 
@@ -155,6 +156,7 @@ class _CAM(object):
         if normalized:
             batch_cams = self._normalize(batch_cams)
 
+        self.clear_hooks()
         return batch_cams
 
     def __repr__(self):

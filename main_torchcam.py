@@ -16,7 +16,7 @@ import os
 from torchcammaster.torchcam.cams import CAM, GradCAM, GradCAMpp, SmoothGradCAMpp, ScoreCAM, SSCAM, ISSCAM
 import matplotlib.pyplot as plt
 import torch.nn.functional as FF
-torch.set_num_threads(1)
+#torch.set_num_threads(1)
 
 def apply_transform(image,size=224):
     means,stds=[0.485, 0.456, 0.406],[0.229, 0.224, 0.225]
@@ -38,16 +38,32 @@ def apply_transform(image,size=224):
     return tensor
 
 def run(*params,arch, img, out, target):
+    key=params[0]
+    if key=='GradCAM':
+        cam=GradCAM(arch, conv_layer)
+    elif key=='GradCAM++':
+        cam=GradCAMpp(arch, conv_layer)
+    elif key=='SmoothGradCAM++':
+        cam=SmoothGradCAMpp(arch, conv_layer, input_layer)
+    elif key=='ScoreCAM':
+        cam=ScoreCAM(arch, conv_layer, input_layer)
+    elif key=='SSCAM':
+        cam=SSCAM(arch, conv_layer, input_layer,num_samples=10)
+    elif key=='ISSCAM':
+        cam=ISSCAM(arch, conv_layer, input_layer)
     #st=time.time()
     #now=st
     model = arch
 
     #print('-----first in run', time.time()-now,'\n')
     #scores = model.arch(input)
-    cam=params[0]
+    out=F.softmax(model.arch(img),dim=1)
     #print('-----after creating object in run', time.time() - now,'\n')
+
     salmap = cam(target,img,out)
-    cam.clear_hooks()
+
+    #print(salmap)
+    #cam.clear_hooks()
     #print(salmap)
     #print('-----after generating salmap in run', time.time() - now,'\n')
     ##plt.figure()
@@ -142,8 +158,8 @@ try:
 except:
     pass
 
-arch=EVMET.Architecture(models.resnet18(pretrained=True).eval(),'resnet18','layer4')
-#arch=EVMET.Architecture(models.vgg16(pretrained=True).eval(),'vgg16','features_29')
+#arch=EVMET.Architecture(models.resnet18(pretrained=True).eval(),'resnet18','layer4')
+arch=EVMET.Architecture(models.vgg16(pretrained=True).eval(),'vgg16','features_29')
 
 avg_drop=ADIC.AverageDrop('average_drop',arch)
 inc_conf=ADIC.IncreaseInConfidence('increase_in_confidence',arch)
@@ -160,18 +176,18 @@ path0=img_dict.get_outpath_root()
 
 conv_layer = arch.layer#MODEL_CONFIG[arch.name]['conv_layer']
 input_layer = MODEL_CONFIG[arch.name]['input_layer']
-#fc_layer = arch.arch.classifier[6]#MODEL_CONFIG[arch.name]['fc_layer']
-fc_layer=MODEL_CONFIG[arch.name]['fc_layer']
-cam_extractors = {
-                      'CAM':CAM(arch, conv_layer, fc_layer),
-                      'GradCAM':GradCAM(arch, conv_layer),
-                      'GradCAM++':GradCAMpp(arch, conv_layer),
-                      'SmoothGradCAM++':SmoothGradCAMpp(arch, conv_layer, input_layer),
-                      'ScoreCAM':ScoreCAM(arch, conv_layer, input_layer),
-                      'SSCAM':SSCAM(arch, conv_layer, input_layer),
-                      'ISSCAM':ISSCAM(arch, conv_layer, input_layer)
-                 }
-for idx,c in enumerate([list(cam_extractors.keys())[1]]):
+fc_layer = arch.arch.classifier[6]#MODEL_CONFIG[arch.name]['fc_layer']
+#fc_layer=MODEL_CONFIG[arch.name]['fc_layer']
+cam_extractors = [
+                      #'CAM':CAM(arch, conv_layer, fc_layer),
+                      'GradCAM',
+                      'GradCAM++',
+                      'SmoothGradCAM++',
+                      'ScoreCAM',
+                      'SSCAM',
+                      'ISSCAM'
+                 ]
+for idx,c in enumerate(cam_extractors):
     try:
         os.mkdir(f'{path0}{str(c)}/')
     except:
@@ -180,7 +196,8 @@ for idx,c in enumerate([list(cam_extractors.keys())[1]]):
     print(img_dict.get_outpath_root())
     print(img_dict.get_img_dict())
     print(f'{path0}output.txt')
-    M_res,m_res=em(cam_extractors[c])
+
+    M_res,m_res=em(c)
 
     print(f'Execution time: {int(time.time() - start)}s')
     print(f'In {num_imgs} images')

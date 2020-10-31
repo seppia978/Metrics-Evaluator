@@ -1,6 +1,6 @@
 import ast
 
-CAMS={'CAM':0,'GradCAM':0,'GradCAM++':0,'SmoothGradCAM++':0,'ScoreCAM':0,'SSCAM':0,'ISSCAM':0}
+CAMS={'GradCAM':0,'GradCAM++':0,'SmoothGradCAM++':0,'ScoreCAM':0,'SSCAM':0,'ISSCAM':0}
 
 with open('out/filter/output.txt','r') as f:
     txt=f.read().split('\n')
@@ -15,8 +15,8 @@ l=[]
 #lst=lst[4:]
 #visu=2
 #lst=lst[int(len(lst)/2):] if visu == 2 else lst[:int(len(lst)/2)]
-
-for d in lst:
+print(len(lst))
+for d in lst[287-12:]:
   val=list(d.values())
   cam=list(d.keys())[0][1]
   CAMS[cam]+=1

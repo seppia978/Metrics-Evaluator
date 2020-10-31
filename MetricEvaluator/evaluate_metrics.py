@@ -249,7 +249,8 @@ class MetricsEvaluator:
                     #st=tt.time()
                     #now=st
                     arch.zero_grad()
-                    out = FF.softmax(arch(inp),dim=1)
+                    score = arch(inp)
+                    out=FF.softmax(score,dim=1)
                     #print('passaggio forward n 1',tt.time()-now,'\n')
                     #now=tt.time()
                     # Get class idx for this img
@@ -259,7 +260,7 @@ class MetricsEvaluator:
                     gt_name = GT[str(img[-13:-5])][0].split()[1]
 
                     # Get explanation map using the explanation method defined when creating the object
-                    saliency_map=self.get_explanation_map(*params,img=inp,out=out,target=class_idx)
+                    saliency_map=self.get_explanation_map(*params,img=inp,out=score,target=class_idx)
                     #print('Saliency map extraction',tt.time() - now,'\n')
                     #now = tt.time()
 

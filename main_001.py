@@ -15,11 +15,11 @@ from yiskw713.cam import ScoreCAM, GradCAMpp, GradCAM, SmoothGradCAMpp
 import matplotlib.pyplot as plt
 import torch.nn.functional as FF
 torch.set_num_threads(1)
-CAMS={'ScoreCAM':ScoreCAM,'GradCAM++':GradCAMpp, 'GradCAM':GradCAM, 'SmoothGradCAM++':SmoothGradCAMpp}
+CAMS={'GradCAM':GradCAM}
 
 
 
-def run(*params,arch, img, target):
+def run(*params,arch, img, out, target):
     #st=time.time()
     #now=st
 
@@ -105,9 +105,9 @@ with open('filter.txt','r') as f:
 img_list=[p.split()[0] for p in txt.strip().split('\n')[base:base+window]]
 img_list={get_num_img(p.split()[0]):p.split()[0] for p in img_list}
 
-model=models.resnet18(pretrained=True).eval()
-arch=EVMET.Architecture(model,'resnet18',model.layer4[1].conv2)
-#arch=EVMET.Architecture(model,'vgg16','features_29')
+model=models.vgg16(pretrained=True).eval()
+#arch=EVMET.Architecture(model,'resnet18',model.layer4[1].conv2)
+arch=EVMET.Architecture(model,'vgg16',model.features[29])
 
 avg_drop=ADIC.AverageDrop('average_drop',arch)
 inc_conf=ADIC.IncreaseInConfidence('increase_in_confidence',arch)

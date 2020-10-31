@@ -15,7 +15,7 @@ from xdeep.xlocal.gradient.explainers import *
 import matplotlib.pyplot as plt
 import torch.nn.functional as FF
 torch.set_num_threads(1)
-CAMS={'GradCAM':GradCAM,'GradCAM++':GradCAMpp}
+CAMS={'GradCAM':GradCAM}#,'GradCAM++':GradCAMpp}
 
 
 

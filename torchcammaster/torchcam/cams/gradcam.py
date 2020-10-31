@@ -47,6 +47,7 @@ class _GradCAM(_CAM):
 
         # Backpropagate to get the gradients on the hooked layer
         loss = scores[:, class_idx].sum()
+
         self.model.zero_grad()
         loss.backward(retain_graph=True)
 
@@ -99,6 +100,8 @@ class GradCAM(_GradCAM):
         # Backpropagate
         self._backprop(scores, class_idx)
         # Global average pool the gradients over spatial dimensions
+        #print(self.hook_g.squeeze(0).mean(axis=(1, 2)),self.hook_g.squeeze(0).mean(axis=(1, 2)).shape)
+        #print(self.hook_g.shape,self.hook_g.squeeze(0).shape,self.hook_g.squeeze(0).mean(axis=(1, 2)).shape)
         return self.hook_g.squeeze(0).mean(axis=(1, 2))
 
 
@@ -157,10 +160,21 @@ class GradCAMpp(_GradCAM):
         # Alpha coefficient for each pixel
         grad_2 = self.hook_g.pow(2)
         grad_3 = self.hook_g.pow(3)
-        alpha = grad_2 / (2 * grad_2 + (grad_3 * self.hook_a).sum(axis=(2, 3), keepdims=True))
+        before_sum = (grad_3 * self.hook_a).sum(axis=(2, 3), keepdims=True)
+        before_sum = torch.where(before_sum != 0, before_sum,
+                                 torch.tensor(10e-8).to(device=before_sum.device))
+        alpha = grad_2 / (2 * grad_2 + before_sum)
 
         # Apply pixel coefficient in each weight
+        #print(torch.isnan((grad_3 * self.hook_a).sum(axis=(2, 3), keepdims=True)).any())
         return alpha.squeeze_(0).mul_(torch.relu(self.hook_g.squeeze(0))).sum(axis=(1, 2))
+
+'''
+before_sum = grad_2 / (2 * grad_2 + (grad_3 * self.hook_a))
+        before_sum=torch.where(before_sum != 0, before_sum,
+                    torch.tensor(10e-8).to(device=before_sum.device))
+        alpha = before_sum.sum(axis=(2, 3), keepdims=True)
+'''
 
 
 class SmoothGradCAMpp(_GradCAM):
@@ -267,7 +281,10 @@ class SmoothGradCAMpp(_GradCAM):
         grad_3.div_(self.num_samples)
 
         # Alpha coefficient for each pixel
-        alpha = grad_2 / (2 * grad_2 + (grad_3 * init_fmap).sum(axis=(2, 3), keepdims=True))
+        before_sum = (grad_3 * self.hook_a).sum(axis=(2, 3), keepdims=True)
+        before_sum = torch.where(before_sum != 0, before_sum,
+                                 torch.tensor(10e-8).to(device=before_sum.device))
+        alpha = grad_2 / (2 * grad_2 + before_sum)
 
         # Apply pixel coefficient in each weight
         return alpha.squeeze_(0).mul_(torch.relu(self.hook_g.squeeze(0))).sum(axis=(1, 2))

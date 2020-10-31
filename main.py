@@ -108,8 +108,8 @@ except:
 print(img_dict.get_outpath_root())
 print(img_dict.get_img_dict())
 
-#arch=EVMET.Architecture(models.resnet18(pretrained=True).eval(),'resnet18','layer4')
-arch=EVMET.Architecture(models.vgg16(pretrained=True).eval(),'vgg16','features_29')
+arch=EVMET.Architecture(models.resnet18(pretrained=True).eval(),'resnet18','layer4')
+#arch=EVMET.Architecture(models.vgg16(pretrained=True).eval(),'vgg16','features_29')
 avg_drop=ADIC.AverageDrop('average_drop',arch)
 inc_conf=ADIC.IncreaseInConfidence('increase_in_confidence',arch)
 deletion=DAI.Deletion('deletion',arch)
