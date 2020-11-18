@@ -9,7 +9,7 @@ import torch
 
 from .cam import _CAM
 
-__all__ = ['GradCAM', 'GradCAMpp', 'SmoothGradCAMpp']
+__all__ = ['GradCAM', 'XGradCAM', 'GradCAMpp', 'SmoothGradCAMpp']
 
 
 class _GradCAM(_CAM):
@@ -104,6 +104,57 @@ class GradCAM(_GradCAM):
         #print(self.hook_g.shape,self.hook_g.squeeze(0).shape,self.hook_g.squeeze(0).mean(axis=(1, 2)).shape)
         return self.hook_g.squeeze(0).mean(axis=(1, 2))
 
+class XGradCAM(_GradCAM):
+    """Implements a class activation map extractor as described in `"Grad-CAM: Visual Explanations from Deep Networks
+    via Gradient-based Localization" <https://arxiv.org/pdf/1610.02391.pdf>`_.
+
+    The localization map is computed as follows:
+
+    .. math::
+        L^{(c)}_{Grad-CAM}(x, y) = ReLU\\Big(\\sum\\limits_k w_k^{(c)} A_k(x, y)\\Big)
+
+    with the coefficient :math:`w_k^{(c)}` being defined as:
+
+    .. math::
+        w_k^{(c)} = \\frac{1}{H \\cdot W} \\sum\\limits_{i=1}^H \\sum\\limits_{j=1}^W
+        \\frac{\\partial Y^{(c)}}{\\partial A_k(i, j)}
+
+    where :math:`A_k(x, y)` is the activation of node :math:`k` in the last convolutional layer of the model at
+    position :math:`(x, y)`,
+    and :math:`Y^{(c)}` is the model output score for class :math:`c` before softmax.
+
+    Example::
+        >>> from torchvision.models import resnet18
+        >>> from torchcam.cams import GradCAM
+        >>> model = resnet18(pretrained=True).eval()
+        >>> cam = GradCAM(model, 'layer4')
+        >>> with torch.no_grad(): scores = model(input_tensor)
+        >>> cam(class_idx=100, scores=scores)
+
+    Args:
+        model (torch.nn.Module): input model
+        conv_layer (str): name of the last convolutional layer
+    """
+
+    hook_a, hook_g = None, None
+
+    def __init__(self, model, conv_layer):
+
+        super().__init__(model, conv_layer)
+
+    def _get_weights(self, class_idx, scores):
+        """Computes the weight coefficients of the hooked activation maps"""
+
+        # Backpropagate
+        self._backprop(scores, class_idx)
+        # Global average pool the gradients over spatial dimensions
+
+        weight=(torch.sum(self.hook_g*self.hook_a,dim=(2,3))/(torch.sum(self.hook_a,dim=(2,3))+1e-6)).squeeze(0)
+        '''
+        X_weights = np.sum(grads_val[0, :] * target, axis=(1, 2))
+        X_weights = X_weights / (np.sum(target, axis=(1, 2)) + 1e-6)
+        '''
+        return weight
 
 class GradCAMpp(_GradCAM):
     """Implements a class activation map extractor as described in `"Grad-CAM++: Improved Visual Explanations for

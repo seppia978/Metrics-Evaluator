@@ -2,8 +2,6 @@ from images_utils import images_utils as IMUT
 from MetricEvaluator import evaluate_metrics as EVMET
 import metrics.average_drop_and_increase_of_confidence as ADIC
 import metrics.deletion_and_insertion as DAI
-import metrics.complexity as COMPLEXITY
-import metrics.coherency as COHERENCY
 import torchvision.models as models
 import torch.nn.functional as F
 import torch
@@ -15,7 +13,7 @@ import time
 from random import randint
 
 import os
-from torchcammaster.torchcam.cams import IntersectionSamCAM,DropCAM, SamCAM3, SamCAM4, SamCAM2, SamCAM, GradCAM,XGradCAM, GradCAMpp, SmoothGradCAMpp, ScoreCAM, SSCAM, ISSCAM
+from torchcammaster.torchcam.cams import CAM, GradCAM, GradCAMpp, SmoothGradCAMpp, ScoreCAM, SSCAM, ISSCAM
 import matplotlib.pyplot as plt
 import torch.nn.functional as FF
 #torch.set_num_threads(1)
@@ -41,29 +39,37 @@ def apply_transform(image,size=224):
 
 def run(*params,arch, img, out, target):
     key=params[0]
-    #key='ScoreCAM'
+    import torchvision.transforms as transforms
+    A = 0
+
+    TRS = transforms.Compose([
+        transforms.RandomRotation(A),
+    ])
+    TRSs = transforms.Compose([
+        transforms.ToPILImage(),
+        transforms.RandomRotation(A),
+        transforms.ToTensor(),
+    ])
+    inp = TRS(img)
+    inp=arch.apply_transform(inp)
+
+    means, stds = torch.tensor([0.485, 0.456, 0.406]), torch.tensor([0.229, 0.224, 0.225])
+    denorm_inp=IMUT.denormalize(inp.squeeze(0))
+    plt.figure()
+    plt.imshow(denorm_inp.squeeze(0).cpu().detach().permute(1, 2, 0).numpy())
+    plt.savefig(f'inp_rot.png')
+
+    #inp+=noise
+    inp=inp.cuda()
+
     if key=='GradCAM':
         cam=GradCAM(arch, conv_layer)
-    elif key=='XGradCAM':
-        cam=XGradCAM(arch,conv_layer)
     elif key=='GradCAM++':
         cam=GradCAMpp(arch, conv_layer)
     elif key=='SmoothGradCAM++':
         cam=SmoothGradCAMpp(arch, conv_layer, input_layer)
     elif key=='ScoreCAM':
         cam=ScoreCAM(arch, conv_layer, input_layer)
-    elif key=='IntersectionSamCAM':
-        cam=IntersectionSamCAM(arch,conv_layer,input_layer)
-    elif key=='SamCAM':
-        cam=SamCAM(arch,conv_layer)
-    elif key=='SamCAM2':
-        cam=SamCAM2(arch,conv_layer,p=0.25)
-    elif key=='SamCAM3':
-        cam=SamCAM3(arch,conv_layer,p=1.0)
-    elif key=='SamCAM4':
-        cam=SamCAM4(arch,conv_layer,input_layer)
-    elif key=='DropCAM':
-        cam=DropCAM(arch,conv_layer,input_layer)
     elif key=='SSCAM':
         cam=SSCAM(arch, conv_layer, input_layer,num_samples=10)
     elif key=='ISSCAM':
@@ -74,24 +80,17 @@ def run(*params,arch, img, out, target):
 
     #print('-----first in run', time.time()-now,'\n')
     #scores = model.arch(input)
-
-    if type(img)==Image.Image:
-        inp=apply_transform(img).cuda()
-    else:
-        inp=img
     out=F.softmax(model.arch(inp),dim=1)
     #print('-----after creating object in run', time.time() - now,'\n')
 
     salmap = cam(target,inp,out)
+    sal1=TRSs(salmap.cpu())
+    sal1=(sal1-sal1.min())/(sal1.max()-sal1.min())
 
+    plt.figure()
+    plt.imshow(IMUT.denormalize(inp.squeeze(0).cpu()*sal1).cpu().detach().permute(1, 2, 0).numpy())
+    plt.savefig(f'exp_rot.png')
 
-    print(cam)
-    #cam.clear_hooks()
-    #print(salmap)
-    #print('-----after generating salmap in run', time.time() - now,'\n')
-    ##plt.figure()
-    #plt.imshow(salmap.squeeze(0).squeeze(0))
-    #plt.savefig(f'result{str(cam)}.png')
 
     return salmap
 
@@ -175,7 +174,6 @@ with open('filter.txt','r') as f:
     txt=f.read()
 
 img_list=[p.split()[0] for p in txt.strip().split('\n')[base:base+window]]
-#print(*(enumerate(img_list)))
 img_list={get_num_img(p.split()[0]):p.split()[0] for p in img_list}
 try:
     os.mkdir(f'{outpath_root}filter/')
@@ -189,14 +187,11 @@ avg_drop=ADIC.AverageDrop('average_drop',arch)
 inc_conf=ADIC.IncreaseInConfidence('increase_in_confidence',arch)
 deletion=DAI.Deletion('deletion',arch)
 insertion=DAI.Insertion('insertion',arch)
-complexity=COMPLEXITY.Complexity('Complexity',arch)
-SME=COHERENCY.SaliencyMapExtractor('ScoreCAM',run)
-coherency=COHERENCY.Coherency('Coherency',arch,SME)
 
 img_dict = IMUT.IMG_list(path=p,outpath_root='out/filter/', GT=GT, labs=labs).select_imgs(img_list)
 
 em = EVMET.MetricsEvaluator(img_dict, saliency_map_extractor=run, model=arch,
-                                metrics=[avg_drop, inc_conf, complexity,coherency])
+                                metrics=[avg_drop, inc_conf, deletion, insertion])
 start = time.time()
 now = start
 path0=img_dict.get_outpath_root()
@@ -210,18 +205,11 @@ cam_extractors = [
                       #'GradCAM',
                       #'GradCAM++',
                       #'SmoothGradCAM++',
-                      'ScoreCAM',
-                      #'XGradCAM',
-                      #'DropCAM'
-                      #'IntersectionSamCAM',
-                      #'SamCAM2',
-                      #'SamCAM3',
-                      #'SamCAM4'
+                      'ScoreCAM'
                       #'SSCAM',
                       #'ISSCAM'
                  ]
 for idx,c in enumerate(cam_extractors):
-
     try:
         os.mkdir(f'{path0}{str(c)}/')
     except:
@@ -236,7 +224,7 @@ for idx,c in enumerate(cam_extractors):
     print(f'Execution time: {int(time.time() - start)}s')
     print(f'In {num_imgs} images')
     for M in M_res:
-        print(f'The final {M.get_name()} is: {M.get_result()}%')
+        print(f'The final {M.get_name()} is: {round(M.get_result(), 2)}%')
 
     time.sleep(chunk_id)
     f=open(f'{path0}output.txt','a')
@@ -248,3 +236,4 @@ for idx,c in enumerate(cam_extractors):
         print('no')
     for m in em.metrics:
         m.clear()
+

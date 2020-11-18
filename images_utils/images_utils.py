@@ -1,5 +1,6 @@
 import os
 import random
+import torch
 import torchvision.transforms as transforms
 
 def trans(img):
@@ -15,11 +16,8 @@ def trans(img):
   return tensor
 
 def denormalize(tensor):
-    denormalized = tensor.clone()
-    means = [0.485, 0.456, 0.406]
-    stds = [0.229, 0.224, 0.225]
-    for channel, mean, std in zip(denormalized[0], means, stds):
-        channel.mul_(std).add_(mean)
+    means, stds = torch.tensor([0.485, 0.456, 0.406]), torch.tensor([0.229, 0.224, 0.225])
+    denormalized=transforms.Normalize(-1*means/stds,1.0/stds)(tensor)
 
     return denormalized
 

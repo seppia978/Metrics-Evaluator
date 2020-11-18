@@ -16,13 +16,8 @@ def load_image(image_path):
     return Image.open(image_path).convert('RGB')
 
 def denormalize(tensor):
-    means = [0.485, 0.456, 0.406]
-    stds = [0.229, 0.224, 0.225]
-
-    denormalized = tensor.clone()
-
-    for channel, mean, std in zip(denormalized[0], means, stds):
-        channel.mul_(std).add_(mean)
+    means, stds = torch.tensor([0.485, 0.456, 0.406]), torch.tensor([0.229, 0.224, 0.225])
+    denormalized = transforms.Normalize(-1 * means / stds, 1.0 / stds)(tensor)
 
     return denormalized
 
@@ -81,10 +76,8 @@ class Architecture:
         return tensor
 
     def detransform(self, tensor):
-        denormalized = tensor.clone()
-
-        for channel, mean, std in zip(denormalized[0], self.means, self.stds):
-            channel.mul_(std).add_(mean)
+        means, stds = torch.tensor([0.485, 0.456, 0.406]), torch.tensor([0.229, 0.224, 0.225])
+        denormalized = transforms.Normalize(-1 * means / stds, 1.0 / stds)(tensor)
 
         return denormalized
 
@@ -260,7 +253,7 @@ class MetricsEvaluator:
                     gt_name = GT[str(img[-13:-5])][0].split()[1]
 
                     # Get explanation map using the explanation method defined when creating the object
-                    saliency_map=self.get_explanation_map(*params,img=inp,out=score,target=class_idx)
+                    saliency_map=self.get_explanation_map(*params,img=inp_0,out=score,target=class_idx)
                     #print('Saliency map extraction',tt.time() - now,'\n')
                     #now = tt.time()
 
@@ -285,7 +278,7 @@ class MetricsEvaluator:
                     Y=[]
                     L=[]
                     plt.figure()
-                    plt.imshow(denormalize(inp*saliency_map).squeeze(0).cpu().detach().permute(1,2,0).numpy())
+                    plt.imshow(denormalize((inp*saliency_map).squeeze(0)).cpu().detach().permute(1,2,0).numpy())
                     plt.savefig(f'{outpath}/inp*sal.png')
                     #print('before evaluations',tt.time() - now,'\n')
                     #now = tt.time()
@@ -311,7 +304,7 @@ class MetricsEvaluator:
                     #now = time.time()
 
         for M in M_res:
-            M.final_step(num_imgs)
+            M.final_step()
         #print(f'after {M.name} final step',tt.time() - now,'\n')
         #now = tt.time()
         return M_res,m_res
