@@ -18,7 +18,7 @@ class Deletion(EVMET.MetricOnSingleExample):
         return self.res_list
 
     def update(self,*args):
-        img, Y_i_c, class_idx, em=args
+        img, Y_i_c, class_idx, em,_=args
         exp_map = em.clone()
         inp = img.clone()
         self.res_list.append(Y_i_c)
@@ -49,7 +49,7 @@ class Insertion(EVMET.MetricOnSingleExample):
         return self.res_list
 
     def update(self, *args):
-        img, Y_i_c, class_idx, em=args
+        img, Y_i_c, class_idx, em,_=args
         exp_map = em.clone()
         inp = self.arch.apply_transform(torch.zeros(img.squeeze(0).shape))
         self.res_list.append(Y_i_c)

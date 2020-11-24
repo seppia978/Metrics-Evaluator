@@ -189,9 +189,9 @@ avg_drop=ADIC.AverageDrop('average_drop',arch)
 inc_conf=ADIC.IncreaseInConfidence('increase_in_confidence',arch)
 deletion=DAI.Deletion('deletion',arch)
 insertion=DAI.Insertion('insertion',arch)
-complexity=COMPLEXITY.Complexity('Complexity',arch)
-SME=COHERENCY.SaliencyMapExtractor('ScoreCAM',run)
-coherency=COHERENCY.Coherency('Coherency',arch,SME)
+complexity=COMPLEXITY.Complexity('Average complexity',arch)
+
+coherency=COHERENCY.Coherency('Average coherency',arch)
 
 img_dict = IMUT.IMG_list(path=p,outpath_root='out/filter/', GT=GT, labs=labs).select_imgs(img_list)
 
@@ -207,21 +207,21 @@ fc_layer = arch.arch.classifier[6]#MODEL_CONFIG[arch.name]['fc_layer']
 #fc_layer=MODEL_CONFIG[arch.name]['fc_layer']
 cam_extractors = [
                       #'CAM':CAM(arch, conv_layer, fc_layer),
-                      #'GradCAM',
-                      #'GradCAM++',
+                      'GradCAM',
+                      'GradCAM++',
                       #'SmoothGradCAM++',
                       'ScoreCAM',
                       #'XGradCAM',
                       #'DropCAM'
                       #'IntersectionSamCAM',
-                      #'SamCAM2',
+                      'SamCAM',
                       #'SamCAM3',
                       #'SamCAM4'
                       #'SSCAM',
                       #'ISSCAM'
                  ]
 for idx,c in enumerate(cam_extractors):
-
+    coherency.saliency_map_extractor=COHERENCY.SaliencyMapExtractor(c, run)
     try:
         os.mkdir(f'{path0}{str(c)}/')
     except:
@@ -231,6 +231,7 @@ for idx,c in enumerate(cam_extractors):
     print(img_dict.get_img_dict())
     print(f'{path0}output.txt')
 
+    coherency.outpath=img_dict.outpath_root
     M_res,m_res=em(c)
 
     print(f'Execution time: {int(time.time() - start)}s')

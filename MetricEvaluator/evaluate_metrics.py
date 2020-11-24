@@ -204,6 +204,14 @@ class MetricsEvaluator:
     def get_explanation_map(self,*params,img=None,out=None,target=None):
         return self.saliency_map_extractor(*params,arch=self.model, img=img, out=out, target=target)
 
+    def saliency_map_checks(self,sm,im):
+        import warnings
+        # if sm is not torch.tensor
+        if sm.isnan().all():
+            warnings.warn(f'Saliency map is all nan! {im}',RuntimeWarning)
+        elif sm.isnan().any():
+            warnings.warn(f'Saliency map has some nan! {im}',RuntimeWarning)
+
     def evaluate_metrics(self,*params):#,**kwargs):
         img_dict, saliency_map_extractor, model, metrics, times=self.img_dict,self.saliency_map_extractor,self.model,self.metrics,self.times
         #for k in kwargs:
@@ -254,12 +262,13 @@ class MetricsEvaluator:
 
                     # Get explanation map using the explanation method defined when creating the object
                     saliency_map=self.get_explanation_map(*params,img=inp_0,out=score,target=class_idx)
+                    self.saliency_map_checks(saliency_map,img)
                     #print('Saliency map extraction',tt.time() - now,'\n')
                     #now = tt.time()
 
                     out,saliency_map=FF.softmax(out,dim=1).detach(),saliency_map#.detach()
 
-                    F.to_pil_image(saliency_map.squeeze(0).cpu()).save(f'{outpath}/exp_map.png')
+                    F.to_pil_image(saliency_map.squeeze(0).cpu()).save(f'{outpath}/sal_map.png')
                     #print(f'After test.run: {round(time.time() - now, 0)}s')
                     if torch.cuda.is_available():
                         saliency_map = saliency_map.cuda()
@@ -279,11 +288,11 @@ class MetricsEvaluator:
                     L=[]
                     plt.figure()
                     plt.imshow(denormalize((inp*saliency_map).squeeze(0)).cpu().detach().permute(1,2,0).numpy())
-                    plt.savefig(f'{outpath}/inp*sal.png')
+                    plt.savefig(f'{outpath}/exp_map.png')
                     #print('before evaluations',tt.time() - now,'\n')
                     #now = tt.time()
                     for c,m in enumerate(m_res):
-                        m.update(inp,Y_i_c,class_idx,saliency_map)
+                        m.update(inp,Y_i_c,class_idx,saliency_map,img)
                         m.final_step()
                         print(f'The final {m.get_name()} score is {m.get_result()}')
                         #print(m.get_res_list())
@@ -297,7 +306,7 @@ class MetricsEvaluator:
                          path=f'{outpath}plot_{k}.png',
                          title=f'label={class_name}, GT={gt_name}')
                     for c,M in enumerate(M_res):
-                        M.update(inp,Y_i_c,class_idx,saliency_map)
+                        M.update(inp,Y_i_c,class_idx,saliency_map,img)
                         #print(f'afetr {M.name}',tt.time() - now,'\n')
                         #now = tt.time()
                     #print(f'After one img: {int(time.time() - now)}s')

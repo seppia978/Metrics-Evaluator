@@ -55,6 +55,12 @@ class IMG_list:
     def get_labels(self):
         return self.labs
 
+    def get_name_images(self,s):
+        return str(s)[-13:-5]
+
+    def get_num_img(self,s):
+        return int(s[-13:-5])
+
     def set_path(self,path):
         self.path=path
     def set_outpath_root(self,outpath_root):

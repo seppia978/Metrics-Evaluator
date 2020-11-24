@@ -441,13 +441,13 @@ class IntersectionSamCAM(_ScoreCAM):
                 #  Get the softmax probabilities of the target class
                 sc[selection_slice] = F.softmax(self.model(masked_input[selection_slice]), dim=1)[:, class_idx]
         '''
-        sc=super()._get_weights()
+        sc=super()._get_weights(class_idx,scores)
         max_idx = sc.topk(self.k)[1]
 
         a = self.upsampled_a.squeeze(0).view(self.upsampled_a.shape[1], 1, -1).squeeze(1)
         b = self.upsampled_a[:, max_idx].sum(dim=1).view(1, 1, -1).squeeze(1)
 
-        print(sc.shape, max_idx.shape, a.shape, b.shape)
+        #print(sc.shape, max_idx.shape, a.shape, b.shape)
         weights = torch.norm(a * b, dim=1)
         weights = (weights - weights.min()) / (weights.max() - weights.min())
 
