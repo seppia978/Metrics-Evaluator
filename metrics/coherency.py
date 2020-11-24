@@ -65,3 +65,7 @@ class Coherency(EVMET.MetricOnAllDataset):
         self.result=sum(self.res_list) * 100 / len(self.res_list)
         #self.result = SKM.auc(torch.arange(0, 1, 1/len(self.res_list)).numpy(),
         #                            torch.tensor(self.res_list).numpy())
+
+    def clear(self):
+        super().clear()
+        self.res_list=[]

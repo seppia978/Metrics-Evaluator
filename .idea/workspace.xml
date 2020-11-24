@@ -5,15 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="deb1f16a-4a04-4e88-acbf-3f53a9553099" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/MetricEvaluator/evaluate_metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/MetricEvaluator/evaluate_metrics.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gather.py" beforeDir="false" afterPath="$PROJECT_DIR$/gather.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/images_utils/images_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/images_utils/images_utils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main_torchcam.py" beforeDir="false" afterPath="$PROJECT_DIR$/main_torchcam.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/metrics/average_drop_and_increase_of_confidence.py" beforeDir="false" afterPath="$PROJECT_DIR$/metrics/average_drop_and_increase_of_confidence.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/metrics/coherency.py" beforeDir="false" afterPath="$PROJECT_DIR$/metrics/coherency.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/metrics/complexity.py" beforeDir="false" afterPath="$PROJECT_DIR$/metrics/complexity.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/metrics/deletion_and_insertion.py" beforeDir="false" afterPath="$PROJECT_DIR$/metrics/deletion_and_insertion.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/torchcammaster/torchcam/cams/cam.py" beforeDir="false" afterPath="$PROJECT_DIR$/torchcammaster/torchcam/cams/cam.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -22,14 +16,14 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.48249027">
+    <splitter split-orientation="horizontal" split-proportion="0.41791046">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file pinned="false" current-in-tab="true">
+          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/main_torchcam.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="45">
-                  <caret line="184" column="1" selection-start-line="184" selection-start-column="1" selection-end-line="184" selection-end-column="1" />
+                <state relative-caret-position="3816">
+                  <caret line="210" column="14" selection-start-line="210" selection-start-column="14" selection-end-line="210" selection-end-column="14" />
                   <folding>
                     <element signature="e#0#45#0" expanded="true" />
                   </folding>
@@ -37,11 +31,11 @@
               </provider>
             </entry>
           </file>
-          <file pinned="false" current-in-tab="false">
+          <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/gather.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="714">
-                  <caret line="42" column="198" selection-start-line="42" selection-start-column="198" selection-end-line="42" selection-end-column="198" />
+                <state relative-caret-position="330">
+                  <caret line="30" selection-start-line="30" selection-end-line="30" />
                 </state>
               </provider>
             </entry>
@@ -68,8 +62,8 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/MetricEvaluator/evaluate_metrics.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-122">
-                  <caret line="208" column="35" selection-start-line="208" selection-start-column="35" selection-end-line="208" selection-end-column="35" />
+                <state relative-caret-position="-1560">
+                  <caret line="148" column="26" lean-forward="true" selection-start-line="148" selection-start-column="26" selection-end-line="148" selection-end-column="26" />
                   <folding>
                     <element signature="e#0#12#0" expanded="true" />
                   </folding>
@@ -124,8 +118,8 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/torchcammaster/torchcam/cams/cam.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-4062">
-                  <caret line="283" column="57" selection-start-line="283" selection-start-column="57" selection-end-line="283" selection-end-column="57" />
+                <state relative-caret-position="1109">
+                  <caret line="671" lean-forward="true" selection-start-line="671" selection-end-line="671" />
                   <folding>
                     <element signature="e#55#66#0" expanded="true" />
                     <element signature="e#12#51#0" expanded="true" />
@@ -170,8 +164,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/metrics/coherency.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="810">
-                  <caret line="52" column="41" lean-forward="true" selection-start-line="52" selection-start-column="41" selection-end-line="52" selection-end-column="41" />
+                <state relative-caret-position="1098">
+                  <caret line="69" column="17" selection-start-line="69" selection-start-column="17" selection-end-line="69" selection-end-column="17" />
                   <folding>
                     <element signature="e#0#12#0" expanded="true" />
                   </folding>
@@ -281,7 +275,6 @@
         <option value="$PROJECT_DIR$/torchcammaster/torchcam/cams/gradcam.py" />
         <option value="$PROJECT_DIR$/metrics/background_randomization.py" />
         <option value="$PROJECT_DIR$/torchcammaster/torchcam/cams/cam.py" />
-        <option value="$PROJECT_DIR$/gather.py" />
         <option value="$PROJECT_DIR$/metrics/average_drop_and_increase_of_confidence.py" />
         <option value="$PROJECT_DIR$/metrics/deletion_and_insertion.py" />
         <option value="$PROJECT_DIR$/images_utils/images_utils.py" />
@@ -289,6 +282,7 @@
         <option value="$PROJECT_DIR$/metrics/complexity.py" />
         <option value="$PROJECT_DIR$/main_torchcam.py" />
         <option value="$PROJECT_DIR$/metrics/coherency.py" />
+        <option value="$PROJECT_DIR$/gather.py" />
       </list>
     </option>
   </component>
@@ -482,16 +476,15 @@
       <workItem from="1605345275012" duration="4686000" />
       <workItem from="1605432419105" duration="9511000" />
       <workItem from="1605542306642" duration="5158000" />
-      <workItem from="1605656093222" duration="47346000" />
+      <workItem from="1605656093222" duration="55300000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="586069000" />
+    <option name="totallyTimeSpent" value="594023000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-348" y="-1448" width="2576" height="1416" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" weight="0.14674735" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -839,26 +832,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/torchcammaster/torchcam/cams/cam.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-4062">
-          <caret line="283" column="57" selection-start-line="283" selection-start-column="57" selection-end-line="283" selection-end-column="57" />
-          <folding>
-            <element signature="e#55#66#0" expanded="true" />
-            <element signature="e#12#51#0" expanded="true" />
-            <element signature="e#12#51#0" expanded="true" />
-            <element signature="e#17960#22707#0" />
-            <element signature="e#12#51#0" expanded="true" />
-            <element signature="e#12#51#0" expanded="true" />
-            <element signature="e#12#51#0" expanded="true" />
-            <element signature="e#12#51#0" expanded="true" />
-            <element signature="e#12#51#0" expanded="true" />
-            <element signature="e#12#51#0" expanded="true" />
-            <element signature="e#12#51#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/torchcammaster/torchcam/cams/gradcam.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="153">
@@ -883,29 +856,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/gather.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="714">
-          <caret line="42" column="198" selection-start-line="42" selection-start-column="198" selection-end-line="42" selection-end-column="198" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/images_utils/images_utils.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-153">
           <caret line="60" column="25" selection-start-line="60" selection-start-column="25" selection-end-line="60" selection-end-column="25" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/MetricEvaluator/evaluate_metrics.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-122">
-          <caret line="208" column="35" selection-start-line="208" selection-start-column="35" selection-end-line="208" selection-end-column="35" />
-          <folding>
-            <element signature="e#0#12#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -930,23 +886,57 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/main_torchcam.py">
+    <entry file="file://$PROJECT_DIR$/torchcammaster/torchcam/cams/cam.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="45">
-          <caret line="184" column="1" selection-start-line="184" selection-start-column="1" selection-end-line="184" selection-end-column="1" />
+        <state relative-caret-position="123">
+          <caret line="449" column="9" selection-start-line="449" selection-start-column="9" selection-end-line="449" selection-end-column="9" />
           <folding>
-            <element signature="e#0#45#0" expanded="true" />
+            <element signature="e#55#66#0" expanded="true" />
+            <element signature="e#12#51#0" expanded="true" />
+            <element signature="e#12#51#0" expanded="true" />
+            <element signature="e#12#51#0" expanded="true" />
+            <element signature="e#12#51#0" expanded="true" />
+            <element signature="e#12#51#0" expanded="true" />
+            <element signature="e#12#51#0" expanded="true" />
+            <element signature="e#12#51#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/metrics/coherency.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="810">
-          <caret line="52" column="41" lean-forward="true" selection-start-line="52" selection-start-column="41" selection-end-line="52" selection-end-column="41" />
+        <state relative-caret-position="1098">
+          <caret line="69" column="17" selection-start-line="69" selection-start-column="17" selection-end-line="69" selection-end-column="17" />
           <folding>
             <element signature="e#0#12#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MetricEvaluator/evaluate_metrics.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1560">
+          <caret line="148" column="26" lean-forward="true" selection-start-line="148" selection-start-column="26" selection-end-line="148" selection-end-column="26" />
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main_torchcam.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3816">
+          <caret line="210" column="14" selection-start-line="210" selection-start-column="14" selection-end-line="210" selection-end-column="14" />
+          <folding>
+            <element signature="e#0#45#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gather.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="30" selection-start-line="30" selection-end-line="30" />
         </state>
       </provider>
     </entry>

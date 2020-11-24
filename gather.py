@@ -53,7 +53,7 @@ for c in CAMS:
         key+='\t'
     print(f'''
     ------------------------------------------------------------------------------------------------------------------------\n
-    {key}\t|  {round(avgdrop[list(CAMS.keys()).index(c)]/CAMS[c],2):.2f}%\t\t|  {round(incinconf[list(CAMS.keys()).index(c)]/CAMS[c],2):.2f}%\t\t\t| {round(comp[list(CAMS.keys()).index(c)]/CAMS[c],3):.2f}%\t\t|  {round(coh[list(CAMS.keys()).index(c)]/CAMS[c],3):.9f}''')
+    {key}\t|  {round(avgdrop[list(CAMS.keys()).index(c)]/CAMS[c],2):.2f}%\t\t|  {round(incinconf[list(CAMS.keys()).index(c)]/CAMS[c],2):.2f}%\t\t\t| {round(comp[list(CAMS.keys()).index(c)]/CAMS[c],3):.3f}%\t\t|  {round(coh[list(CAMS.keys()).index(c)]/CAMS[c],3):.9f}''')
 print('\n----------------------------------------------------------------------------------------------------------------------------')
 #for x in l:
 #    print(x[1])

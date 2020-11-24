@@ -84,6 +84,8 @@ def run(*params,arch, img, out, target):
 
     salmap = cam(target,inp,out)
 
+    salmap.view(1,-1)[0,(1-salmap).view(1,-1).topk(int((salmap.shape[-1]**2)/2))[1]]=0.
+    #[(1-salmap).view(1,1,1,-1).topk(int((salmap.shape[-1]**2)/2))]=0.
 
     print(cam)
     #cam.clear_hooks()
