@@ -1,4 +1,8 @@
 import ast
+import sys
+
+path=sys.argv[1] if len(sys.argv)>1 else None
+
 
 CAMS={
     # 'CAM':CAM(arch, conv_layer, fc_layer),
@@ -9,14 +13,20 @@ CAMS={
     #'XGradCAM':0,
     # 'DropCAM'
     #'IntersectionSamCAM':0,
-    'SamCAM':0,
+    #'SamCAM':0,
+    'IntegratedGradients':0,
+    'Saliency':0
     # 'SamCAM3',
     # 'SamCAM4'
     # 'SSCAM',
     # 'ISSCAM'
     }
 
-with open('out/filter/output.txt','r') as f:
+if path is None:
+    path='out/filter/output.txt'
+else:
+    path=f'out/filter/{path}/output.txt'
+with open(path,'r') as f:
     txt=f.read().split('\n')
 
 lst=[]

@@ -40,9 +40,11 @@ class Coherency(EVMET.MetricOnAllDataset):
         inp,Y,target,A,img=args
 
         B=self.saliency_map_extractor(self.arch,inp*A,target)
+        A,B=A.detach(),B.detach()
         if self.outpath is not None:
             IM=IMUT.IMG_list()
             F.to_pil_image(B.squeeze(0).cpu()).save(f'{self.outpath}{IM.get_num_img(img)}_{img}/B.png')
+            F.to_pil_image(A.squeeze(0).cpu()).save(f'{self.outpath}{IM.get_num_img(img)}_{img}/A.png')
 
         # Linear coherency
         '''
@@ -61,7 +63,7 @@ class Coherency(EVMET.MetricOnAllDataset):
 
     def final_step(self,**kwargs):
         self.final_step_preliminary_checks()
-        print(self.res_list)
+
         self.result=sum(self.res_list) * 100 / len(self.res_list)
         #self.result = SKM.auc(torch.arange(0, 1, 1/len(self.res_list)).numpy(),
         #                            torch.tensor(self.res_list).numpy())

@@ -19,17 +19,17 @@ class Complexity(EVMET.MetricOnAllDataset):
         '''
         self.result+=(saliency_map>0).sum()
         self.tot+=(saliency_map.shape[-1]*saliency_map.shape[-2])
-        '''
+        #'''
 
-        # entropy
-        S=saliency_map.clone().view(1,-1).squeeze(0)
-        S/=S.sum()
-        self.result+=STS.entropy(S)
-        self.tot+=1
+        # l1 norm
+        #'''
+        self.result=saliency_map.sum()
+        self.tot=(saliency_map.shape[-1]*saliency_map.shape[-2])
+        #'''
+
 
     def final_step(self,**kwargs):
-
-        self.result=float(self.result / self.tot)
+        self.result=float(self.result * 100/ self.tot)
 
     def clear(self):
         super().clear()

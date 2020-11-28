@@ -16,6 +16,8 @@ from random import randint
 
 import os
 from torchcammaster.torchcam.cams import IntersectionSamCAM,DropCAM, SamCAM3, SamCAM4, SamCAM2, SamCAM, GradCAM,XGradCAM, GradCAMpp, SmoothGradCAMpp, ScoreCAM, SSCAM, ISSCAM
+from captum.attr import IntegratedGradients,Saliency
+
 import matplotlib.pyplot as plt
 import torch.nn.functional as FF
 #torch.set_num_threads(1)
@@ -68,6 +70,12 @@ def run(*params,arch, img, out, target):
         cam=SSCAM(arch, conv_layer, input_layer,num_samples=10)
     elif key=='ISSCAM':
         cam=ISSCAM(arch, conv_layer, input_layer)
+    elif key=='IntegratedGradients':
+        ig=IntegratedGradients(arch.arch)
+        cam=ig.attribute
+    elif key=='Saliency':
+        saliency=Saliency(arch.arch)
+        cam=saliency.attribute
     #st=time.time()
     #now=st
     model = arch
@@ -82,18 +90,27 @@ def run(*params,arch, img, out, target):
     out=F.softmax(model.arch(inp),dim=1)
     #print('-----after creating object in run', time.time() - now,'\n')
 
-    salmap = cam(target,inp,out)
-
-    salmap.view(1,-1)[0,(1-salmap).view(1,-1).topk(int((salmap.shape[-1]**2)/2))[1]]=0.
-    #[(1-salmap).view(1,1,1,-1).topk(int((salmap.shape[-1]**2)/2))]=0.
-
     print(cam)
+    if 'GradCAM' in key:
+        salmap = cam(inp,target=target,scores=out)
+    else:
+        salmap = cam(inp, target=target)
+    # remove 50% less important pixel
+    #salmap.view(1,-1)[0,(1-salmap).view(1,-1).topk(int((salmap.shape[-1]**2)/2))[1]]=0.
+
+
     #cam.clear_hooks()
     #print(salmap)
     #print('-----after generating salmap in run', time.time() - now,'\n')
     ##plt.figure()
     #plt.imshow(salmap.squeeze(0).squeeze(0))
     #plt.savefig(f'result{str(cam)}.png')
+
+    salmap=salmap.to(torch.float32)
+    if key=='IntegratedGradients' or key=='Saliency':
+        salmap = torch.abs(salmap.sum(dim=1))
+        salmap = (salmap - salmap.min()) / (salmap.max() - salmap.min())
+        salmap = salmap.squeeze(0)
 
     return salmap
 
@@ -205,18 +222,20 @@ path0=img_dict.get_outpath_root()
 
 conv_layer = arch.layer#MODEL_CONFIG[arch.name]['conv_layer']
 input_layer = MODEL_CONFIG[arch.name]['input_layer']
-fc_layer = arch.arch.classifier[6]#MODEL_CONFIG[arch.name]['fc_layer']
-#fc_layer=MODEL_CONFIG[arch.name]['fc_layer']
+fc_layer = arch.arch.classifier[6]#MODEL_CONFIG[arch.name]['fc_layer'] # for vgg
+#fc_layer=MODEL_CONFIG[arch.name]['fc_layer'] # for resnet
 cam_extractors = [
                       #'CAM':CAM(arch, conv_layer, fc_layer),
                       'GradCAM',
                       'GradCAM++',
                       #'SmoothGradCAM++',
                       'ScoreCAM',
+                      'IntegratedGradients',
+                      'Saliency'
                       #'XGradCAM',
                       #'DropCAM'
                       #'IntersectionSamCAM',
-                      'SamCAM',
+                      #'SamCAM',
                       #'SamCAM3',
                       #'SamCAM4'
                       #'SSCAM',

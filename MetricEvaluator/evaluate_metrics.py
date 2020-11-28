@@ -267,8 +267,9 @@ class MetricsEvaluator:
                     #now = tt.time()
 
                     out,saliency_map=FF.softmax(out,dim=1).detach(),saliency_map#.detach()
-
-                    F.to_pil_image(saliency_map.squeeze(0).cpu()).save(f'{outpath}/sal_map.png')
+                    saliency_map32=saliency_map.to(torch.float32)
+                    inp=inp.to(saliency_map.dtype)
+                    F.to_pil_image(saliency_map32.squeeze(0).cpu().detach()).save(f'{outpath}/sal_map.png')
                     #print(f'After test.run: {round(time.time() - now, 0)}s')
                     if torch.cuda.is_available():
                         saliency_map = saliency_map.cuda()
@@ -291,6 +292,7 @@ class MetricsEvaluator:
                     plt.savefig(f'{outpath}/exp_map.png')
                     #print('before evaluations',tt.time() - now,'\n')
                     #now = tt.time()
+
                     for c,m in enumerate(m_res):
                         m.update(inp,Y_i_c,class_idx,saliency_map,img)
                         m.final_step()

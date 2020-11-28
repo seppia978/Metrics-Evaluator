@@ -103,19 +103,19 @@ class _CAM(object):
         if class_idx < 0:
             raise ValueError("Incorrect `class_idx` argument value")
 
-        #  Check scores arg
+        #  Check scores
         if self._score_used and not isinstance(scores, torch.Tensor):
             raise ValueError("model output scores is required to be passed to compute CAMs")
 
-    def __call__(self, class_idx, inp, scores=None, normalized=True):
+    def __call__(self, inp, target=None, scores=None, normalized=True):
 
         # Integrity check
-        self._precheck(class_idx, scores)
+        self._precheck(target, scores)
 
         # Compute CAM
-        return self.compute_cams(class_idx, inp, scores, normalized)
+        return self.compute_cams(inp, target, scores, normalized)
 
-    def compute_cams(self, class_idx, inp, scores=None, normalized=True):
+    def compute_cams(self, inp, class_idx, scores=None, normalized=True):
         """Compute the CAM for a specific output class
 
         Args:
@@ -521,6 +521,9 @@ class DropCAM(_ScoreCAM):
         if self._hooks_enabled:
             self._input = input[0].data.clone()
 
+    def sum_to_1(self,x):
+        return x/x.sum()
+
     def _get_weights(self, class_idx, scores=None):
         """Computes the weight coefficients of the hooked activation maps"""
 
@@ -531,7 +534,8 @@ class DropCAM(_ScoreCAM):
         # 1 * O * M * N
         upsampled_a = F.interpolate(upsampled_a, self._input.shape[-2:], mode='bilinear', align_corners=False)
 
-        dropout_weights = torch.ones(self.max_iter, upsampled_a.shape[1]).to(device=upsampled_a.device)
+        dropout_weights = torch.ones(upsampled_a.shape[1]).to(device=upsampled_a.device)
+        dropout_weights=self.sum_to_1(dropout_weights)
 
         for i in range(self.max_iter):
             zero_idx = torch.randperm(upsampled_a.shape[1])[:int(upsampled_a.shape[1] * self.prob)]
