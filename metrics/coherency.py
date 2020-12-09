@@ -12,7 +12,7 @@ class SaliencyMapExtractor:
         self.name,self.method=name,method
 
     def __call__(self,arch,img,target,out=None):
-        return self.method(self.name,arch=arch,img=img,out=out,target=target)
+        return self.method(arch=arch,img=img,out=out,target=target,extractor=self.name)
 
 class Coherency(EVMET.MetricOnAllDataset):
     def __init__(self,
@@ -39,7 +39,7 @@ class Coherency(EVMET.MetricOnAllDataset):
         self.update_preliminary_checks()
         inp,Y,target,A,img=args
 
-        B=self.saliency_map_extractor(self.arch,inp*A,target)
+        B=self.saliency_map_extractor(arch=self.arch,img=inp*A,target=target)
         A,B=A.detach(),B.detach()
         if self.outpath is not None:
             IM=IMUT.IMG_list()

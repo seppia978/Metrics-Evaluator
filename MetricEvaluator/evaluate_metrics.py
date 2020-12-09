@@ -84,8 +84,8 @@ class Architecture:
 class Metric:
 
     # CONSTRUCTOR
-    def __init__(self,name,alldataset):
-        self.name,self.alldataset=name,alldataset
+    def __init__(self,name,alldataset,onsaliencyextractor):
+        self.name,self.alldataset,self.onsaliencyextractor=name,alldataset,onsaliencyextractor
 
     # UTILS
     def help(self):
@@ -106,6 +106,9 @@ class Metric:
 
 
     # TO OVERRIDE
+    def initial_step(self,*args):
+        pass
+
     def update(self,*args):
         raise NotImplementedError("method needs to be defined by sub-class")
 
@@ -115,11 +118,14 @@ class Metric:
     def clear(self):
         raise NotImplementedError("method needs to be defined by sub-class")
 
+    def print(self):
+        pass
+
 class MetricOnSingleExample(Metric):
 
     # CONSTRUCTOR
-    def __init__(self,name,result,res_list=[],alldataset=False):
-        super().__init__(name,alldataset)
+    def __init__(self,name,result,res_list=[],alldataset=False,onsaliencyextractor=False):
+        super().__init__(name,alldataset,onsaliencyextractor)
         self.result,self.res_list=result,res_list
 
     # UTILS
@@ -127,7 +133,7 @@ class MetricOnSingleExample(Metric):
         self.res_list = []
 
     def clear(self):
-        self.result = 0
+        self.result = 0.
 
     def get_result(self):
         return self.result
@@ -137,13 +143,25 @@ class MetricOnSingleExample(Metric):
 
 class MetricOnAllDataset(Metric):
     # CONSTRUCTOR
-    def __init__(self,name,result,alldataset=True):
-        super().__init__(name,alldataset)
+    def __init__(self,name,result,alldataset=True,onsaliencyextractor=False):
+        super().__init__(name,alldataset,onsaliencyextractor)
         self.result=result
 
     # UTILS
     def clear(self):
-        self.result=0
+        self.result=0.
+
+    def get_result(self):
+        return self.result
+
+class MetricOnSaliencyExtractor(Metric):
+    def __init__(self,name,result,alldataset=True,onsaliencyextractor=True):
+        super().__init__(name, alldataset,onsaliencyextractor)
+        self.result = result
+
+    # UTILS
+    def clear(self):
+        self.result = 0.
 
     def get_result(self):
         return self.result
@@ -201,8 +219,8 @@ class MetricsEvaluator:
         self.metrics.append(Metric(name,func))
 
     # EVALUATE METRICS
-    def get_explanation_map(self,*params,img=None,out=None,target=None):
-        return self.saliency_map_extractor(*params,arch=self.model, img=img, out=out, target=target)
+    def get_explanation_map(self,img=None,out=None,target=None,**params):
+        return self.saliency_map_extractor(**params,arch=self.model, img=img, out=out, target=target)
 
     def saliency_map_checks(self,sm,im):
         import warnings
@@ -212,7 +230,8 @@ class MetricsEvaluator:
         elif sm.isnan().any():
             warnings.warn(f'Saliency map has some nan! {im}',RuntimeWarning)
 
-    def evaluate_metrics(self,*params):#,**kwargs):
+    def evaluate_metrics(self,**params):#,**kwargs):
+        print_metrics=params['print_metrics'] if 'print_metrics' in params.keys() else False
         img_dict, saliency_map_extractor, model, metrics, times=self.img_dict,self.saliency_map_extractor,self.model,self.metrics,self.times
         #for k in kwargs:
         #    k=kwargs[k]
@@ -226,8 +245,13 @@ class MetricsEvaluator:
 
         if metrics is not []:
             for _ in range(times):
-                m_res = [m for m in metrics if m.is_all_dataset() is not True]
-                M_res = [m for m in metrics if m.is_all_dataset()]
+                m_res = [m for m in metrics if m.alldataset == False and m.onsaliencyextractor == False]
+                M_res = [m for m in metrics if m.alldataset and m.onsaliencyextractor == False]
+                m_se = [m for m in metrics if m.alldataset and m.onsaliencyextractor]
+
+                # initial step
+                for m in m_res+M_res+m_se:
+                    m.initial_step()
 
                 # For each image
                 for i, (k,img) in enumerate(img_dict.get_items()):
@@ -261,8 +285,13 @@ class MetricsEvaluator:
                     gt_name = GT[str(img[-13:-5])][0].split()[1]
 
                     # Get explanation map using the explanation method defined when creating the object
-                    saliency_map=self.get_explanation_map(*params,img=inp_0,out=score,target=class_idx)
+                    for m in m_se:
+                        m.update()
+                    saliency_map=self.get_explanation_map(**params,img=inp_0,out=score,target=class_idx)
+                    for m in m_se:
+                        m.update()
                     self.saliency_map_checks(saliency_map,img)
+
                     #print('Saliency map extraction',tt.time() - now,'\n')
                     #now = tt.time()
 
@@ -314,12 +343,19 @@ class MetricsEvaluator:
                     #print(f'After one img: {int(time.time() - now)}s')
                     #now = time.time()
 
-        for M in M_res:
+        for M in M_res+m_se:
             M.final_step()
         #print(f'after {M.name} final step',tt.time() - now,'\n')
         #now = tt.time()
-        return M_res,m_res
+
+        if print_metrics:
+            for m in m_res+M_res+m_se:
+                m.print()
+
+        mad=[m for m in M_res+m_res+m_se if m.alldataset]
+        mse=[m for m in M_res+m_res+m_se if m.alldataset == False]
+        return mad,mse
 
 
-    def __call__(self,*params):
-        return self.evaluate_metrics(*params)
+    def __call__(self,**params):
+        return self.evaluate_metrics(**params)

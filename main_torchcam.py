@@ -4,6 +4,8 @@ import metrics.average_drop_and_increase_of_confidence as ADIC
 import metrics.deletion_and_insertion as DAI
 import metrics.complexity as COMPLEXITY
 import metrics.coherency as COHERENCY
+import metrics.average_score_variance as ASV
+import metrics.elasped_time as EA
 import torchvision.models as models
 import torch.nn.functional as F
 import torch
@@ -41,8 +43,9 @@ def apply_transform(image,size=224):
 
     return tensor
 
-def run(*params,arch, img, out, target):
-    key=params[0]
+def run(arch=None, img=None, out=None, target=None,**params):
+
+    key=params['extractor']
     #key='ScoreCAM'
     if key=='GradCAM':
         cam=GradCAM(arch, conv_layer)
@@ -90,11 +93,12 @@ def run(*params,arch, img, out, target):
     out=F.softmax(model.arch(inp),dim=1)
     #print('-----after creating object in run', time.time() - now,'\n')
 
-    print(cam)
+    #print(cam)
     if 'GradCAM' in key:
         salmap = cam(inp,target=target,scores=out)
     else:
         salmap = cam(inp, target=target)
+
     # remove 50% less important pixel
     #salmap.view(1,-1)[0,(1-salmap).view(1,-1).topk(int((salmap.shape[-1]**2)/2))[1]]=0.
 
@@ -110,8 +114,28 @@ def run(*params,arch, img, out, target):
     if key=='IntegratedGradients' or key=='Saliency':
         salmap = torch.abs(salmap.sum(dim=1))
         salmap = (salmap - salmap.min()) / (salmap.max() - salmap.min())
-        salmap = salmap.squeeze(0)
+        #salmap = salmap.squeeze(0)
+        salmap_previous = salmap
+        sigma=10.
 
+        # torchvision gaussian
+        '''
+        trans=transforms.Compose([
+            transforms.GaussianBlur(3,sigma=sigma)
+        ])
+        salmap=trans(salmap)
+        '''
+
+        #scipy gaussian
+        #'''
+        from scipy.ndimage import gaussian_filter as GB
+        salmap=torch.from_numpy(GB(salmap.cpu().detach().numpy(),sigma))
+        #'''
+        #print(salmap.max(),salmap.min())
+        salmap = torch.abs(salmap)
+        salmap = (salmap - salmap.min()) / (salmap.max() - salmap.min())
+        #salmap=salmap.squeeze(0)
+        #print(salmap.shape)
     return salmap
 
 
@@ -201,29 +225,33 @@ try:
 except:
     pass
 
-#arch=EVMET.Architecture(models.resnet18(pretrained=True).eval(),'resnet18','layer4')
-arch=EVMET.Architecture(models.vgg16(pretrained=True).eval(),'vgg16','features_29')
+arch=EVMET.Architecture(models.resnet18(pretrained=True).eval(),'resnet18','layer4')
+#arch=EVMET.Architecture(models.resnet101(pretrained=True).eval(),'resnet101','layer4')
+#arch=EVMET.Architecture(models.resnet152(pretrained=True).eval(),'resnet152','layer4')
+#arch=EVMET.Architecture(models.vgg16(pretrained=True).eval(),'vgg16','features_29')
 
+#print(arch.arch)
 avg_drop=ADIC.AverageDrop('average_drop',arch)
 inc_conf=ADIC.IncreaseInConfidence('increase_in_confidence',arch)
 deletion=DAI.Deletion('deletion',arch)
 insertion=DAI.Insertion('insertion',arch)
 complexity=COMPLEXITY.Complexity('Average complexity',arch)
-
 coherency=COHERENCY.Coherency('Average coherency',arch)
+avg_score_var=ASV.AverageScoreVariance('Average score variance',arch)
+ea=EA.ElapsedTime('Elapsed Time',nimgs=len(img_list))
 
 img_dict = IMUT.IMG_list(path=p,outpath_root='out/filter/', GT=GT, labs=labs).select_imgs(img_list)
 
 em = EVMET.MetricsEvaluator(img_dict, saliency_map_extractor=run, model=arch,
-                                metrics=[avg_drop, inc_conf, complexity,coherency])
+                                metrics=[ea,avg_drop, inc_conf, complexity,coherency,avg_score_var])
 start = time.time()
 now = start
 path0=img_dict.get_outpath_root()
 
 conv_layer = arch.layer#MODEL_CONFIG[arch.name]['conv_layer']
 input_layer = MODEL_CONFIG[arch.name]['input_layer']
-fc_layer = arch.arch.classifier[6]#MODEL_CONFIG[arch.name]['fc_layer'] # for vgg
-#fc_layer=MODEL_CONFIG[arch.name]['fc_layer'] # for resnet
+#fc_layer = arch.arch.classifier[6]#MODEL_CONFIG[arch.name]['fc_layer'] # for vgg
+fc_layer=MODEL_CONFIG[arch.name]['fc_layer'] # for resnet
 cam_extractors = [
                       #'CAM':CAM(arch, conv_layer, fc_layer),
                       'GradCAM',
@@ -253,12 +281,12 @@ for idx,c in enumerate(cam_extractors):
     print(f'{path0}output.txt')
 
     coherency.outpath=img_dict.outpath_root
-    M_res,m_res=em(c)
+    M_res,m_res=em(extractor=c,print_metrics=True)
 
-    print(f'Execution time: {int(time.time() - start)}s')
-    print(f'In {num_imgs} images')
-    for M in M_res:
-        print(f'The final {M.get_name()} is: {M.get_result()}%')
+    #print(f'Execution time: {int(time.time() - start)}s')
+    #print(f'In {num_imgs} images')
+    #for M in M_res:
+    #    print(f'The final {M.get_name()} is: {M.get_result()}%')
 
     time.sleep(chunk_id)
     f=open(f'{path0}output.txt','a')

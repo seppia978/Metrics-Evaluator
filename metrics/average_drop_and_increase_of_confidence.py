@@ -28,6 +28,9 @@ class AverageDrop(EVMET.MetricOnAllDataset):
         super().clear()
         self.num_imgs=0.
 
+    def print(self):
+        print(f'Average Drop: {self.result}%')
+
 class IncreaseInConfidence(EVMET.MetricOnAllDataset):
     def __init__(self,name,arch,result=0.):
         super().__init__(name,result)
@@ -55,3 +58,5 @@ class IncreaseInConfidence(EVMET.MetricOnAllDataset):
         super().clear()
         self.num_imgs=0.
 
+    def print(self):
+        print(f'Average Increase: {self.result}%')
