@@ -23,8 +23,9 @@ class Complexity(EVMET.MetricOnAllDataset):
 
         # l1 norm
         #'''
-        self.result=saliency_map.sum()
-        self.tot=(saliency_map.shape[-1]*saliency_map.shape[-2])
+        self.result+=abs(saliency_map).sum()
+        print(self.result)
+        self.tot+=(saliency_map.shape[-1]*saliency_map.shape[-2])
         #'''
 
 
@@ -34,3 +35,10 @@ class Complexity(EVMET.MetricOnAllDataset):
     def clear(self):
         super().clear()
         self.tot=0.
+
+    def print(self):
+        print(f'Complexity: {self.result}%')
+
+import detecto
+
+model.predict_top()

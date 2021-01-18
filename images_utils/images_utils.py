@@ -79,6 +79,11 @@ class IMG_list:
     def add_img(self,idx,img):
         self.img_dict[idx]=img
 
+    def select_all_imgs_from_path(self):
+        images_list = os.listdir(self.path)
+        self.img_dict={k:v for k,v in enumerate(images_list)}
+        return self
+
     def select_imgs(self, id):
         i,l=list(id.keys()),list(id.values())
         images_list=[im for im in l]

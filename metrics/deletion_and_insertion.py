@@ -76,19 +76,21 @@ class Insertion(EVMET.MetricOnSingleExample):
 def remove_more_important_px(img,exp_map,step=0.01):
     exp_map=exp_map.squeeze(0).squeeze(0)
     max_iter=int((img.shape[2]*img.shape[3]*step))
-
+    #print(exp_map)
     #print(max_iter)
     #print(exp_map.view(1,-1).topk(max_iter)[1])
 
-    argmax = exp_map.view(1, -1)
+     #= exp_map.view(1, -1)
+    argmax=exp_map.view(1, -1).topk(max_iter)[1]
+    print(argmax.shape)
     zero = trans(torch.zeros(3).unsqueeze(1).unsqueeze(1)).cuda()
     zero=zero.repeat(1,1,1,max_iter)
     #im1=img.view(-1,1,3).clone()
     #print(zero)
     #print(argmax)
 
-    i = argmax // exp_map.shape[1]
-    j = argmax % exp_map.shape[1]
+    i = (argmax // exp_map.shape[1]).type(torch.LongTensor)
+    j = (argmax % exp_map.shape[1]).type(torch.LongTensor)
     img[:, :, i, j]=zero.view(img[:, :, i, j].shape)
     #print(i,j)
     exp_map[i,j]=0

@@ -53,9 +53,16 @@ class Coherency(EVMET.MetricOnAllDataset):
         y=m*x+1.
         '''
         # Pearson correlation coefficient
+        #'''
         Asq,Bsq=A.view(1,-1).squeeze(0).cpu(),B.view(1,-1).squeeze(0).cpu()
         y,_=STS.pearsonr(Asq,Bsq)
         y=abs(y)
+        #'''
+
+        # Cross correlation
+        '''
+        y=
+        '''
         if torch.tensor(y).isnan():
             y=sum(self.res_list)/len(self.res_list)
 
@@ -71,3 +78,6 @@ class Coherency(EVMET.MetricOnAllDataset):
     def clear(self):
         super().clear()
         self.res_list=[]
+
+    def print(self):
+        print(f'Coherency: {self.result}%')
