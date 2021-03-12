@@ -43,8 +43,8 @@ class Coherency(EVMET.MetricOnAllDataset):
         A,B=A.detach(),B.detach()
         if self.outpath is not None:
             IM=IMUT.IMG_list()
-            F.to_pil_image(B.squeeze(0).cpu()).save(f'{self.outpath}{IM.get_num_img(img)}_{img}/B.png')
-            F.to_pil_image(A.squeeze(0).cpu()).save(f'{self.outpath}{IM.get_num_img(img)}_{img}/A.png')
+            F.to_pil_image(B.squeeze(0).cpu()).save(f'{self.outpath}{IM.get_num_img(img)-1}_{img}/B.png')
+            F.to_pil_image(A.squeeze(0).cpu()).save(f'{self.outpath}{IM.get_num_img(img)-1}_{img}/A.png')
 
         # Linear coherency
         '''

@@ -18,6 +18,7 @@ import torch.nn.functional as F
 import torch
 import torchvision.transforms as transforms
 import PIL.Image as Image
+
 import sys
 import time
 import os
@@ -25,7 +26,7 @@ import pathlib
 
 # backbones
 from torchcammaster.torchcam.cams import CAM,IntersectionSamCAM,DropCAM, SamCAM3, SamCAM4, SamCAM2, SamCAM, GradCAM,XGradCAM, GradCAMpp, SmoothGradCAMpp, ScoreCAM, SSCAM, ISSCAM
-from captum.attr import IntegratedGradients,Saliency,Occlusion,FeaturePermutation
+from captum.attr import IntegratedGradients,Saliency,Occlusion
 
 
 def apply_transform(image,size=224):
@@ -51,43 +52,43 @@ def run(arch=None, img=None, out=None, target=None,**params):
 
     key=params['extractor']
     #key='ScoreCAM'
-    if key=='GradCAM':
+    if key=='GradCAM'.lower():
         cam=GradCAM(arch, conv_layer)
-    elif key=='CAM':
+    elif key=='CAM'.lower():
         cam=CAM(arch, conv_layer, fc_layer)
-    elif key=='XGradCAM':
+    elif key=='XGradCAM'.lower():
         cam=XGradCAM(arch,conv_layer)
-    elif key=='GradCAM++':
+    elif key=='GradCAM++'.lower():
         cam=GradCAMpp(arch, conv_layer)
-    elif key=='SmoothGradCAM++':
+    elif key=='SmoothGradCAM++'.lower():
         cam=SmoothGradCAMpp(arch, conv_layer, input_layer)
-    elif key=='ScoreCAM':
+    elif key=='ScoreCAM'.lower():
         cam=ScoreCAM(arch, conv_layer, input_layer)
-    elif key=='IntersectionSamCAM':
+    elif key=='IntersectionSamCAM'.lower():
         cam=IntersectionSamCAM(arch,conv_layer,input_layer)
-    elif key=='SamCAM':
+    elif key=='SamCAM'.lower():
         cam=SamCAM(arch,conv_layer)
-    elif key=='SamCAM2':
+    elif key=='SamCAM2'.lower():
         cam=SamCAM2(arch,conv_layer,p=0.25)
-    elif key=='SamCAM3':
+    elif key=='SamCAM3'.lower():
         cam=SamCAM3(arch,conv_layer,p=1.0)
-    elif key=='SamCAM4':
+    elif key=='SamCAM4'.lower():
         cam=SamCAM4(arch,conv_layer,input_layer)
-    elif key=='DropCAM':
+    elif key=='DropCAM'.lower():
         cam=DropCAM(arch,conv_layer,input_layer)
-    elif key=='SSCAM':
+    elif key=='SSCAM'.lower():
         cam=SSCAM(arch, conv_layer, input_layer,num_samples=10)
-    elif key=='ISSCAM':
+    elif key=='ISSCAM'.lower():
         cam=ISSCAM(arch, conv_layer, input_layer)
-    elif 'IntegratedGradients' in key or key=='IGDown':
+    elif 'IntegratedGradients'.lower() in key or key=='IGDown'.lower():
         ig=IntegratedGradients(arch.arch)
         cam=ig.attribute
-    elif key=='Saliency' or key=='SaliencyDown':
+    elif key=='Saliency'.lower() or key=='SaliencyDown'.lower():
         saliency=Saliency(arch.arch)
         cam=saliency.attribute
-    elif key=="FakeCAM":
+    elif key=="FakeCAM".lower():
         cam=None
-    elif key=='Occlusion':
+    elif key=='Occlusion'.lower():
         occ=Occlusion(arch.arch)
         cam=occ.attribute
 
@@ -100,9 +101,9 @@ def run(arch=None, img=None, out=None, target=None,**params):
     out=F.softmax(model.arch(inp),dim=1)
 
     if cam is not None:
-        if 'GradCAM' in key:
+        if 'GradCAM'.lower() in key:
             salmap = cam(inp,target=target,scores=out)
-        elif 'Occlusion' in key:
+        elif 'Occlusion'.lower() in key:
             salmap = cam(inp,sliding_window_shapes=(3,45,45),strides=(3,9,9), target=target)
             salmap = torch.abs(salmap.sum(dim=1))
         else:
@@ -115,7 +116,7 @@ def run(arch=None, img=None, out=None, target=None,**params):
     #salmap.view(1,-1)[0,(1-salmap).view(1,-1).topk(int((salmap.shape[-1]**2)/2))[1]]=0.
 
     salmap=salmap.to(torch.float32)
-    if 'IntegratedGradients' in key or key=='Saliency':
+    if 'IntegratedGradients'.lower() in key or key=='Saliency'.lower():
         salmap = torch.abs(salmap.sum(dim=1))
         salmap = (salmap - salmap.min()) / (salmap.max() - salmap.min())
 
@@ -144,7 +145,7 @@ def run(arch=None, img=None, out=None, target=None,**params):
         salmap = torch.abs(salmap)
         salmap = (salmap - salmap.min()) / (salmap.max() - salmap.min())
         salmap=salmap.squeeze(0)
-    elif key=='IGDown' or key=='SaliencyDown':
+    elif key=='IGDown'.lower() or key=='SaliencyDown'.lower():
         salmap = torch.abs(salmap.sum(dim=1))
         salmap = (salmap - salmap.min()) / (salmap.max() - salmap.min())
         salmap_previous=salmap
@@ -181,12 +182,20 @@ if __name__ == '__main__':
     parser.add_argument('-rp',"--res_path", type=str, help='results path',required=True)
     parser.add_argument('-cid',"--chunk_id", type=int, help='Job chunk id',required=True)
     parser.add_argument('-cdim',"--chunk_dim", type=int, help='Job chunk dimension',required=True)
+    parser.add_argument('-cnn',"--cnn", type=str, help='Backbone to use',required=True)
+    parser.add_argument('-m',"--metrics", type=str, help='Metrics to evaluate',required=True,nargs='+')
+    parser.add_argument('-am',"--attr_methods", type=str, help='Attribution methods to evaluate',required=True,nargs='+')
+
 
     args = parser.parse_args()
 
     res_path=args.res_path
     chunk_id=args.chunk_id
     chunk_dim=args.chunk_dim
+    arch_name=args.cnn.lower()
+    metric_names=[el.lower() for el in args.metrics]
+    cam_extractors=[el.lower() for el in args.attr_methods]
+    print(cam_extractors)
 
     if res_path[-1] is not '/':
         res_path=res_path+'/'
@@ -264,24 +273,42 @@ if __name__ == '__main__':
     #img_dict=IMUT.IMG_list(path=p,outpath_root='out/filter/', GT=GT, labs=labs).select_particular_img('gr.jpg')
 
 
-    arch=EVMET.Architecture(models.resnet18(pretrained=True).eval(),'resnet18','layer4')
+    arch_dict={
+        'resnet18': EVMET.Architecture(models.resnet18(pretrained=True).eval(),'resnet18','layer4'),
+        'resnet50': EVMET.Architecture(models.resnet50(pretrained=True).eval(),'resnet50','layer4'),
+        'vgg16': EVMET.Architecture(models.vgg16(pretrained=True).eval(),'vgg16','features_29')
+    }
+    arch=arch_dict[arch_name]
     #arch=EVMET.Architecture(models.resnet101(pretrained=True).eval(),'resnet101','layer4')
     #arch=EVMET.Architecture(models.resnet152(pretrained=True).eval(),'resnet152','layer4')
     #arch=EVMET.Architecture(models.vgg16(pretrained=True).eval(),'vgg16','features_29')
 
-    avg_drop=ADIC.AverageDrop('average_drop',arch)
-    inc_conf=ADIC.IncreaseInConfidence('increase_in_confidence',arch)
-    deletion=DAI.Deletion('deletion',arch)
-    insertion=DAI.Insertion('insertion',arch)
-    complexity=COMPLEXITY.Complexity('Average complexity',arch)
-    coherency=COHERENCY.Coherency('Average coherency',arch)
-    avg_score_var=ASV.AverageScoreVariance('Average score variance',arch)
-    ea=EA.ElapsedTime('Elapsed Time',nimgs=len(img_dict))
+    metrics_dict={
+        'average_drop': ADIC.AverageDrop('average_drop',arch),
+        'average_increase' : ADIC.IncreaseInConfidence('average_increase',arch),
+        'increase_in_confidence' : ADIC.IncreaseInConfidence('increase_in_confidence',arch),
+        'deletion': DAI.Deletion('deletion',arch),
+        'insertion': DAI.Insertion('insertion',arch),
+        'average_complexity': COMPLEXITY.Complexity('Average complexity',arch),
+        'average_coherency': COHERENCY.Coherency('Average coherency',arch),
+        'average_score_variance': ASV.AverageScoreVariance('Average score variance',arch)
+    }
+
+    metrics={m:metrics_dict[m] for m in metric_names}
+
+    # avg_drop=ADIC.AverageDrop('average_drop',arch)
+    # inc_conf=ADIC.IncreaseInConfidence('increase_in_confidence',arch)
+    # deletion=DAI.Deletion('deletion',arch)
+    # insertion=DAI.Insertion('insertion',arch)
+    # complexity=COMPLEXITY.Complexity('Average complexity',arch)
+    # coherency=COHERENCY.Coherency('Average coherency',arch)
+    # avg_score_var=ASV.AverageScoreVariance('Average score variance',arch)
+    # ea=EA.ElapsedTime('Elapsed Time',nimgs=len(img_dict))
 
 
 
     em = EVMET.MetricsEvaluator(img_dict, saliency_map_extractor=run, model=arch,
-                                    metrics=[avg_drop])
+                                    metrics=[metrics[m] for m in metrics])
     start = time.time()
     now = start
 
@@ -289,31 +316,33 @@ if __name__ == '__main__':
     input_layer = MODEL_CONFIG[arch.name]['input_layer']
     #fc_layer = arch.arch.classifier[6]#MODEL_CONFIG[arch.name]['fc_layer'] # for vgg
     fc_layer=MODEL_CONFIG[arch.name]['fc_layer'] # for resnet
-    cam_extractors = [
-                          #'CAM'
-                          #'GradCAM',
-                          #'GradCAM++',
-                          #'SmoothGradCAM++',
-                          #'ScoreCAM',
-                          'IntegratedGradients20',
-                          'IntegratedGradients5',
-                          'IntegratedGradients3',
-                          #'IGDown',
-                          #'SaliencyDown',
-                          #'Saliency',
-                          #'FakeCAM',
-                          #'Occlusion'
-                          #'XGradCAM',
-                          #'DropCAM'
-                          #'IntersectionSamCAM',
-                          #'SamCAM',
-                          #'SamCAM3',
-                          #'SamCAM4'
-                          #'SSCAM',
-                          #'ISSCAM'
-                     ]
+
+    # cam_extractors = [
+    #                       #'CAM'
+    #                       #'GradCAM',
+    #                       #'GradCAM++',
+    #                       #'SmoothGradCAM++',
+    #                       #'ScoreCAM',
+    #                       'IntegratedGradients20',
+    #                       'IntegratedGradients5',
+    #                       'IntegratedGradients3',
+    #                       #'IGDown',
+    #                       #'SaliencyDown',
+    #                       #'Saliency',
+    #                       #'FakeCAM',
+    #                       #'Occlusion'
+    #                       #'XGradCAM',
+    #                       #'DropCAM'
+    #                       #'IntersectionSamCAM',
+    #                       #'SamCAM',
+    #                       #'SamCAM3',
+    #                       #'SamCAM4'
+    #                       #'SSCAM',
+    #                       #'ISSCAM'
+    #                  ]
     for idx,c in enumerate(cam_extractors):
-        coherency.saliency_map_extractor=COHERENCY.SaliencyMapExtractor(c, run)
+        if 'average_coherency' in metric_names:
+            metrics['average_coherency'].saliency_map_extractor=COHERENCY.SaliencyMapExtractor(c, run)
         try:
             os.mkdir(f'{res_path}{str(c)}/')
         except:
@@ -323,7 +352,8 @@ if __name__ == '__main__':
         #print(img_dict.get_img_dict())
         print(f'{res_path}output.txt')
 
-        coherency.outpath=img_dict.outpath_root
+        if 'average_coherency' in metric_names:
+            metrics['average_coherency'].outpath=img_dict.outpath_root
         if '20' in c:
             sigma = 20
         elif '5' in c:

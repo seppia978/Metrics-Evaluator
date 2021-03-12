@@ -283,7 +283,7 @@ class MetricsEvaluator:
                     Y_i_c = out.max(1)[0].item()
                     class_idx = out.max(1)[-1].item()
                     class_name = labs[str(class_idx)]
-                    gt_name = 'Golden Retriever'#GT[str(img[-13:-5])][0].split()[1]
+                    gt_name = GT[str(img[-13:-5])][0].split()[1]
 
                     # Get explanation map using the explanation method defined when creating the object
                     for m in m_se:
@@ -299,8 +299,7 @@ class MetricsEvaluator:
                     out,saliency_map=FF.softmax(out,dim=1).detach(),saliency_map#.detach()
                     saliency_map32=saliency_map.to(torch.float32)
                     inp=inp.to(saliency_map.dtype)
-                    out1 = '''/homes/spoppi/tirocinio_tesi/Score-CAM000/Score-CAM/out/filter/NEW3/'''
-                    F.to_pil_image(saliency_map32.squeeze(0).cpu().detach()).save(f'''{out1}/A_IntegratedGradients_s{int(params['sigma'])}_res18_{img_dict.get_idx_from_img(img)}.png''')
+                    F.to_pil_image(saliency_map32.squeeze(0).cpu().detach()).save(f'''{outpath}/saliency_map.png''')
                     #print(f'After test.run: {round(time.time() - now, 0)}s')
                     if torch.cuda.is_available():
                         saliency_map = saliency_map.cuda()
@@ -324,7 +323,7 @@ class MetricsEvaluator:
                     inp_den=IMUT.denormalize(inp)
 
 
-                    #F.to_pil_image((inp_den*saliency_map).squeeze(0).cpu().detach()).save(f'''{outpath}/E_{params['extractor']}_s50_res18_{img_dict.get_idx_from_img(img)}.png''')
+                    F.to_pil_image((inp_den*saliency_map).squeeze(0).cpu().detach()).save(f'''{outpath}/exp_map.png''')
                     #print('before evaluations',tt.time() - now,'\n')
                     #now = tt.time()
 
