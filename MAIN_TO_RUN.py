@@ -1,3 +1,4 @@
+import argparse
 from images_utils import images_utils as IMUT
 
 # to use MetricEvaluator
@@ -20,9 +21,10 @@ import PIL.Image as Image
 import sys
 import time
 import os
+import pathlib
 
 # backbones
-from torchcammaster.torchcam.cams import IntersectionSamCAM,DropCAM, SamCAM3, SamCAM4, SamCAM2, SamCAM, GradCAM,XGradCAM, GradCAMpp, SmoothGradCAMpp, ScoreCAM, SSCAM, ISSCAM
+from torchcammaster.torchcam.cams import CAM,IntersectionSamCAM,DropCAM, SamCAM3, SamCAM4, SamCAM2, SamCAM, GradCAM,XGradCAM, GradCAMpp, SmoothGradCAMpp, ScoreCAM, SSCAM, ISSCAM
 from captum.attr import IntegratedGradients,Saliency,Occlusion,FeaturePermutation
 
 
@@ -51,6 +53,8 @@ def run(arch=None, img=None, out=None, target=None,**params):
     #key='ScoreCAM'
     if key=='GradCAM':
         cam=GradCAM(arch, conv_layer)
+    elif key=='CAM':
+        cam=CAM(arch, conv_layer, fc_layer)
     elif key=='XGradCAM':
         cam=XGradCAM(arch,conv_layer)
     elif key=='GradCAM++':
@@ -75,7 +79,7 @@ def run(arch=None, img=None, out=None, target=None,**params):
         cam=SSCAM(arch, conv_layer, input_layer,num_samples=10)
     elif key=='ISSCAM':
         cam=ISSCAM(arch, conv_layer, input_layer)
-    elif key=='IntegratedGradients'or key=='IGDown':
+    elif 'IntegratedGradients' in key or key=='IGDown':
         ig=IntegratedGradients(arch.arch)
         cam=ig.attribute
     elif key=='Saliency' or key=='SaliencyDown':
@@ -111,12 +115,17 @@ def run(arch=None, img=None, out=None, target=None,**params):
     #salmap.view(1,-1)[0,(1-salmap).view(1,-1).topk(int((salmap.shape[-1]**2)/2))[1]]=0.
 
     salmap=salmap.to(torch.float32)
-    if key=='IntegratedGradients' or key=='Saliency':
+    if 'IntegratedGradients' in key or key=='Saliency':
         salmap = torch.abs(salmap.sum(dim=1))
         salmap = (salmap - salmap.min()) / (salmap.max() - salmap.min())
 
         salmap_previous = salmap
-        sigma=3.
+        if '20' in key:
+            sigma=20
+        elif '5' in key:
+            sigma=5
+        else:
+            sigma=3
 
         # torchvision gaussian
         '''
@@ -127,7 +136,7 @@ def run(arch=None, img=None, out=None, target=None,**params):
         '''
 
         #scipy gaussian
-        '''
+        #'''
         from scipy.ndimage import gaussian_filter as GB
         salmap=torch.from_numpy(GB(salmap.cpu().detach().numpy(),sigma))
         #'''
@@ -161,161 +170,180 @@ def get_n_imgs(l,pattern):
         s = ''.join(map(str, ['0' for _ in range(13 - 5 - len(str(l[i])))]))+str(l[i])
         p=pattern.replace('********', s)
         ret.append(p)
-    return {k: v for k, v in zip(range(l[0],l[-1]+1), ret)}
+    return {k: v for k, v in zip(range(len(l)), ret)}
 
 
 #---------------------- MAIN ----------------------#
-i=0
-chunk_id=-1
-chunk_dim=0
-params=[]
-for arg in sys.argv[1:]:
-    if not(i%2==0):
-        params.append(arg)
-    i+=1
 
-print(len(sys.argv[1:]))
-filtered=True if (len(sys.argv[1:]))/2 != 3 else False
+if __name__ == '__main__':
 
-chunk_id,chunk_dim=[int(x) for x in params[0:2]]
-num_imgs = chunk_dim
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-rp',"--res_path", type=str, help='results path',required=True)
+    parser.add_argument('-cid',"--chunk_id", type=int, help='Job chunk id',required=True)
+    parser.add_argument('-cdim',"--chunk_dim", type=int, help='Job chunk dimension',required=True)
 
-displacement=0
+    args = parser.parse_args()
 
-print(num_imgs)
-p = ''
-root = './'  # '/tirocinio_tesi/Score-CAM000/Score-CAM'
-outpath_root = root + 'out/'
-data_root = root + 'ILSVRC2012_devkit_t12/data/'
+    res_path=args.res_path
+    chunk_id=args.chunk_id
+    chunk_dim=args.chunk_dim
 
-with open(data_root + 'IMAGENET_path.txt', 'r') as f:
-    p = f.read().strip()
-p+='/'
-labs_w = []
-with open(data_root + 'labels.txt', 'r') as f:
-    labs_w = [x[9:] for x in f.read().strip().split('\n')]
+    if res_path[-1] is not '/':
+        res_path=res_path+'/'
 
-labs = []
-with open(data_root + 'imagenet_classes.txt', 'r') as f:
-    labs = [x for x in f.read().strip().split('\n')]
+    pathlib.Path(res_path).mkdir(parents=True, exist_ok=True)
+    i=0
 
-labs1 = {}
-with open(data_root + 'labels.txt', 'r') as f:
-    labs1 = {str(get_name_images(x.split()[0])): x.split()[2] for x in f.read().split('\n')}
-    # labs1=[x[2] for x in labs1.split()]
+    p = ''
+    root = './'  # '/tirocinio_tesi/Score-CAM000/Score-CAM'
+    outpath_root = root + 'out/'
+    data_root = root + 'ILSVRC2012_devkit_t12/data/'
 
-GT = {}
-with open(data_root + 'imagenet_val_gts.txt', 'r') as f:
-    GT = {get_name_images(x.split()[0]): [get_name_images(x.split()[0]) + ' ' + x.split()[2]] for x in f.read().strip().split('\n')}
+    with open(data_root + 'IMAGENET_path.txt', 'r') as f:
+        p = f.read().strip()
+    p+='/'
+    labs_w = []
+    with open(data_root + 'labels.txt', 'r') as f:
+        labs_w = [x[9:] for x in f.read().strip().split('\n')]
 
-VGG_CONFIG = {_vgg: dict(input_layer='features', conv_layer='features')
-              for _vgg in models.vgg.__dict__.keys()}
+    labs = []
+    with open(data_root + 'imagenet_classes.txt', 'r') as f:
+        labs = [x for x in f.read().strip().split('\n')]
 
-RESNET_CONFIG = {_resnet: dict(input_layer='conv1', conv_layer='layer4', fc_layer='fc')
-                 for _resnet in models.resnet.__dict__.keys()}
+    labs1 = {}
+    with open(data_root + 'labels.txt', 'r') as f:
+        labs1 = {str(get_name_images(x.split()[0])): x.split()[2] for x in f.read().split('\n')}
+        # labs1=[x[2] for x in labs1.split()]
 
-DENSENET_CONFIG = {_densenet: dict(input_layer='features', conv_layer='features', fc_layer='classifier')
-                   for _densenet in models.densenet.__dict__.keys()}
-MODEL_CONFIG = {
-    **VGG_CONFIG, **RESNET_CONFIG, **DENSENET_CONFIG,
-    'mobilenet_v2': dict(input_layer='features', conv_layer='features')
-}
+    GT = {}
+    with open(data_root + 'imagenet_val_gts.txt', 'r') as f:
+        GT = {get_name_images(x.split()[0]): [get_name_images(x.split()[0]) + ' ' + x.split()[2]] for x in f.read().strip().split('\n')}
 
+    VGG_CONFIG = {_vgg: dict(input_layer='features', conv_layer='features')
+                  for _vgg in models.vgg.__dict__.keys()}
 
+    RESNET_CONFIG = {_resnet: dict(input_layer='conv1', conv_layer='layer4', fc_layer='fc')
+                     for _resnet in models.resnet.__dict__.keys()}
 
-#img_dict=IMUT.IMG_list(path=p,GT=GT,labs=labs).generate_random(num_imgs)
-base,window=chunk_id*chunk_dim+displacement,chunk_dim
-pattern='ILSVRC2012_val_********.JPEG'
-#img_list=get_n_imgs(range(base+1,base+window+1),pattern)
-if filtered:
-    with open('filter.txt','r') as f:
-        txt=f.read()
-
-    img_list=[p.split()[0] for p in txt.strip().split('\n')[base:base+window]]
-    #print(*(enumerate(img_list)))
-    img_list={get_num_img(p.split()[0]):p.split()[0] for p in img_list}
-    try:
-        os.mkdir(f'{outpath_root}filter/')
-    except:
-        pass
-    img_dict = IMUT.IMG_list(path=p, outpath_root='out/filter/', GT=GT, labs=labs).select_imgs(img_list)
-else:
-    img_dict=IMUT.IMG_list(path=p, outpath_root='out/filter/', GT=GT, labs=labs).select_all_imgs_from_path()
-
-#rch=EVMET.Architecture(models.resnet18(pretrained=True).eval(),'resnet18','layer4')
-#arch=EVMET.Architecture(models.resnet101(pretrained=True).eval(),'resnet101','layer4')
-#arch=EVMET.Architecture(models.resnet152(pretrained=True).eval(),'resnet152','layer4')
-arch=EVMET.Architecture(models.vgg16(pretrained=True).eval(),'vgg16','features_29')
-
-print(chunk_id,chunk_dim)
-avg_drop=ADIC.AverageDrop('average_drop',arch)
-inc_conf=ADIC.IncreaseInConfidence('increase_in_confidence',arch)
-deletion=DAI.Deletion('deletion',arch)
-insertion=DAI.Insertion('insertion',arch)
-complexity=COMPLEXITY.Complexity('Average complexity',arch)
-coherency=COHERENCY.Coherency('Average coherency',arch)
-avg_score_var=ASV.AverageScoreVariance('Average score variance',arch)
-ea=EA.ElapsedTime('Elapsed Time',nimgs=len(img_dict))
+    DENSENET_CONFIG = {_densenet: dict(input_layer='features', conv_layer='features', fc_layer='classifier')
+                       for _densenet in models.densenet.__dict__.keys()}
+    MODEL_CONFIG = {
+        **VGG_CONFIG, **RESNET_CONFIG, **DENSENET_CONFIG,
+        'mobilenet_v2': dict(input_layer='features', conv_layer='features')
+    }
 
 
 
-em = EVMET.MetricsEvaluator(img_dict, saliency_map_extractor=run, model=arch,
-                                metrics=[deletion,insertion])
-start = time.time()
-now = start
-path0=img_dict.get_outpath_root()
+    #img_dict=IMUT.IMG_list(path=p,GT=GT,labs=labs).generate_random(num_imgs)
+    displacement=0
+    base,window=chunk_id*chunk_dim+displacement,chunk_dim
+    pattern='ILSVRC2012_val_********.JPEG'
+    #img_list=get_n_imgs(range(base+1,base+window+1),pattern)
+    #p='''/homes/spoppi/tirocinio_tesi/Score-CAM000/Score-CAM/out/filter'''
+    # filtered=True
+    # if filtered:
+    #     #with open('filter.txt','r') as f:
+    #     #    txt=f.read()
+    #
+    #     #img_list=[p.split()[0] for p in txt.strip().split('\n')[base:base+window]]
+    #     #print(*(enumerate(img_list)))
+    #     img_list =['1','1011','24','49','719','118','1096','1312','567','26','865']
+    #     #img_list=['1965']
+    #     img_list=get_n_imgs(img_list,pattern)
+    #     img_list={get_num_img(p.split()[0]):p.split()[0] for p in img_list.values()}
+    #     print(img_list)
+    #     try:
+    #         os.mkdir(f'{outpath_root}filter/')
+    #     except:
+    #         pass
+    #     img_dict = IMUT.IMG_list(path=p, outpath_root='out/filter/', GT=GT, labs=labs).select_imgs(img_list)
+    # else:
+    img_list={k:v for k,v in enumerate(sorted(os.listdir(p))[base:base+window])}
+    print(img_list)
+    img_dict=IMUT.IMG_list(path=p, outpath_root=res_path, GT=GT, labs=labs).select_imgs(img_list)
+    #img_dict=IMUT.IMG_list(path=p,outpath_root='out/filter/', GT=GT, labs=labs).select_particular_img('gr.jpg')
 
-conv_layer = arch.layer#MODEL_CONFIG[arch.name]['conv_layer']
-input_layer = MODEL_CONFIG[arch.name]['input_layer']
-fc_layer = arch.arch.classifier[6]#MODEL_CONFIG[arch.name]['fc_layer'] # for vgg
-#fc_layer=MODEL_CONFIG[arch.name]['fc_layer'] # for resnet
-cam_extractors = [
-                      #'CAM':CAM(arch, conv_layer, fc_layer),
-                      #'GradCAM',
-                      #'GradCAM++',
-                      #'SmoothGradCAM++',
-                      #'ScoreCAM',
-                      'IntegratedGradients',
-                      #'IGDown',
-                      #'SaliencyDown',
-                      #'Saliency',
-                      'FakeCAM',
-                      'Occlusion'
-                      #'XGradCAM',
-                      #'DropCAM'
-                      #'IntersectionSamCAM',
-                      #'SamCAM',
-                      #'SamCAM3',
-                      #'SamCAM4'
-                      #'SSCAM',
-                      #'ISSCAM'
-                 ]
-for idx,c in enumerate(cam_extractors):
-    coherency.saliency_map_extractor=COHERENCY.SaliencyMapExtractor(c, run)
-    try:
-        os.mkdir(f'{path0}{str(c)}/')
-    except:
-        pass
-    img_dict.set_outpath_root(f'{path0}{str(c)}/')
-    print(img_dict.get_outpath_root())
-    print(img_dict.get_img_dict())
-    print(f'{path0}output.txt')
 
-    coherency.outpath=img_dict.outpath_root
-    M_res,m_res=em(extractor=c,print_metrics=True)
+    arch=EVMET.Architecture(models.resnet18(pretrained=True).eval(),'resnet18','layer4')
+    #arch=EVMET.Architecture(models.resnet101(pretrained=True).eval(),'resnet101','layer4')
+    #arch=EVMET.Architecture(models.resnet152(pretrained=True).eval(),'resnet152','layer4')
+    #arch=EVMET.Architecture(models.vgg16(pretrained=True).eval(),'vgg16','features_29')
 
-    #print(f'Execution time: {int(time.time() - start)}s')
-    #print(f'In {num_imgs} images')
-    #for M in M_res:
-    #    print(f'The final {M.get_name()} is: {M.get_result()}%')
+    avg_drop=ADIC.AverageDrop('average_drop',arch)
+    inc_conf=ADIC.IncreaseInConfidence('increase_in_confidence',arch)
+    deletion=DAI.Deletion('deletion',arch)
+    insertion=DAI.Insertion('insertion',arch)
+    complexity=COMPLEXITY.Complexity('Average complexity',arch)
+    coherency=COHERENCY.Coherency('Average coherency',arch)
+    avg_score_var=ASV.AverageScoreVariance('Average score variance',arch)
+    ea=EA.ElapsedTime('Elapsed Time',nimgs=len(img_dict))
 
-    time.sleep(chunk_id)
-    f=open(f'{path0}output.txt','a')
-    output={(f'Chunk{chunk_id}',f'{c}'):([m.get_result() for m in M_res],[torch.tensor(m.get_result()).mean().item() for m in m_res])}
-    try:
-        f.write(str(output))
-        f.write('\n')
-    except:
-        print('no')
-    for m in em.metrics:
-        m.clear()
+
+
+    em = EVMET.MetricsEvaluator(img_dict, saliency_map_extractor=run, model=arch,
+                                    metrics=[avg_drop])
+    start = time.time()
+    now = start
+
+    conv_layer = arch.layer#MODEL_CONFIG[arch.name]['conv_layer']
+    input_layer = MODEL_CONFIG[arch.name]['input_layer']
+    #fc_layer = arch.arch.classifier[6]#MODEL_CONFIG[arch.name]['fc_layer'] # for vgg
+    fc_layer=MODEL_CONFIG[arch.name]['fc_layer'] # for resnet
+    cam_extractors = [
+                          #'CAM'
+                          #'GradCAM',
+                          #'GradCAM++',
+                          #'SmoothGradCAM++',
+                          #'ScoreCAM',
+                          'IntegratedGradients20',
+                          'IntegratedGradients5',
+                          'IntegratedGradients3',
+                          #'IGDown',
+                          #'SaliencyDown',
+                          #'Saliency',
+                          #'FakeCAM',
+                          #'Occlusion'
+                          #'XGradCAM',
+                          #'DropCAM'
+                          #'IntersectionSamCAM',
+                          #'SamCAM',
+                          #'SamCAM3',
+                          #'SamCAM4'
+                          #'SSCAM',
+                          #'ISSCAM'
+                     ]
+    for idx,c in enumerate(cam_extractors):
+        coherency.saliency_map_extractor=COHERENCY.SaliencyMapExtractor(c, run)
+        try:
+            os.mkdir(f'{res_path}{str(c)}/')
+        except:
+            pass
+        img_dict.set_outpath_root(f'{res_path}{str(c)}/')
+        print(img_dict.get_outpath_root())
+        #print(img_dict.get_img_dict())
+        print(f'{res_path}output.txt')
+
+        coherency.outpath=img_dict.outpath_root
+        if '20' in c:
+            sigma = 20
+        elif '5' in c:
+            sigma = 5
+        else:
+            sigma = 3
+        M_res,m_res=em(extractor=c,print_metrics=True,sigma=sigma)
+
+        #print(f'Execution time: {int(time.time() - start)}s')
+        #print(f'In {num_imgs} images')
+        #for M in M_res:
+        #    print(f'The final {M.get_name()} is: {M.get_result()}%')
+
+        time.sleep(chunk_id)
+        f=open(f'{res_path}output.txt','a')
+        output={(f'Chunk{chunk_id}',f'{c}'):([m.get_result() for m in M_res],[torch.tensor(m.get_result()).mean().item() for m in m_res])}
+        try:
+            f.write(str(output))
+            f.write('\n')
+        except:
+            print('no')
+        for m in em.metrics:
+            m.clear()

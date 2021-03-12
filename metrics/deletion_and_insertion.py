@@ -82,7 +82,7 @@ def remove_more_important_px(img,exp_map,step=0.01):
 
      #= exp_map.view(1, -1)
     argmax=exp_map.view(1, -1).topk(max_iter)[1]
-    print(argmax.shape)
+    #print(argmax.shape)
     zero = trans(torch.zeros(3).unsqueeze(1).unsqueeze(1)).cuda()
     zero=zero.repeat(1,1,1,max_iter)
     #im1=img.view(-1,1,3).clone()

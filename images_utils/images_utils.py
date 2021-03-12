@@ -44,6 +44,10 @@ class IMG_list:
         return list(self.img_dict.values())[n]
     def get_idx_img(self, idx):
         return self.img_dict[idx]
+    def get_idx_from_img(self,img):
+        for k,v in self.img_dict.items():
+            if v==img:
+                return k
     def get_list(self):
         return list(self.img_dict.values())
     def get_keys(self):
@@ -110,3 +114,7 @@ class IMG_list:
             return self
         except:
             raise ValueError('Path must not be None and num_imgs must be greater than 0')
+
+    def select_particular_img(self,name):
+        self.img_dict={'0':name}
+        return self
