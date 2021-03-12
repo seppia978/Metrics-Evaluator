@@ -32,6 +32,7 @@ which is a class containing all the suite to manage the flow to evaluate each me
 4) "-cnn" the backbone to be used, str
 5) "-m" the metrics to evaluate, list of str (an undescore has to be put between each pair of words: "average_increase")
 6) "-am" the attribution methods, list of str
+7) "-h" to get help
 
 # Examples:
 1) python MAIN_TO_RUN.py -rp "path/of/life" -cid 0 -cdim 150 -cnn "resnet50" -m average_drop average_increase average_coherency -am integratedgradients saliency
