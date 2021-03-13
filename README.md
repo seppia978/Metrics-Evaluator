@@ -24,8 +24,8 @@ Then the central class is:
 
 which is a class containing all the suite to manage the flow to evaluate each metric on the data provided. The method that gets the job done is evaluate_metrics(), containing all the instructions for its purpose.
 
-### Usage examples
-# Few parameters are required:
+# Usage examples
+### Few parameters are required:
 1) "-rp" to specify the path to save the results in, str
 2) "-cid" to specify the chunk id, int
 3) "-cdim" to specify how many images each chunk is taking into account, int
@@ -34,17 +34,20 @@ which is a class containing all the suite to manage the flow to evaluate each me
 6) "-am" the attribution methods, list of str
 7) "-h" to get help
 
-# Examples:
-1) python MAIN_TO_RUN.py -rp "path/of/life" -cid 0 -cdim 150 -cnn "resnet50" -m average_drop average_increase average_coherency -am integratedgradients saliency
-2) python MAIN_TO_RUN.py -rp "path/of/life" -cid 2 -cdim 3 -cnn "vgg16" -m average_complexity average_coherency -am ScoreCAM
-3) python MAIN_TO_RUN.py -rp "path/of/life" -cid 4 -cdim 1000 -cnn "resnet18" -m average_complexity average_score_variance deletion insertion -am gradcam GradCAM++ integratedgradients saliency
+### Examples:
+1) python MAIN_TO_RUN.py -rp "path/of/life" -cid 0 -cdim 150 -cnn "resnet50" -am integratedgradients saliency -m average_drop average_increase average_coherency
+   - This launches it assigning 150 images to the job 0. It uses resnet50, computes visual explanations using IntegratedGradients and Saliency and evaluates the average drop, the average increase and the average coherency
+2) python MAIN_TO_RUN.py -rp "path/of/life" -cid 2 -cdim 3 -cnn "vgg16" -am ScoreCAM -m average_complexity average_coherency
+   - This launches it assigning 3 images to the job 2. It uses VGG16, computes visual explanations using just ScoreCAM and evaluates the average complexity and the average coherency
+4) python MAIN_TO_RUN.py -rp "path/of/life" -cid 4 -cdim 1000 -cnn "resnet18" -am gradcam GradCAM++ integratedgradients saliency -m average_complexity average_score_variance deletion insertion
+   - This launches it assigning 1000 images to the job 4. It uses resnet18, computes visual explanations using GradCAM, GradCAM++, IntegratedGradients and Saliency and evaluates the average complexity, the average score variance, the deletion and the insertion
 
-# List of backbones implemented:
+### List of backbones implemented:
 1) resnet18
 2) resnet50
 3) vgg16
 
-# List of attribution methods implemented
+### List of attribution methods implemented
 1) GradCAM
 2) GradCAM++
 3) SmoothGradCAM++
@@ -54,7 +57,7 @@ which is a class containing all the suite to manage the flow to evaluate each me
 7) Occlusion
 8) FakeCAM
 
-# List of metrics implemented
+### List of metrics implemented
 1) Average drop
 2) Average increase/increase in confidence
 3) Deletion
