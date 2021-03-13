@@ -330,8 +330,8 @@ class MetricsEvaluator:
                     for c,m in enumerate(m_res):
                         m.update(inp,Y_i_c,class_idx,saliency_map,img)
                         m.final_step()
-                        print(f'The final {m.get_name()} score is {m.get_result()}')
-                        #print(m.get_res_list())
+                        m.print(k)
+
                         Y.append(m.get_res_list())
                         L.append((m.get_name(),m.get_result()))
                         m.clear_list()

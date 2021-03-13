@@ -38,7 +38,3 @@ class Complexity(EVMET.MetricOnAllDataset):
 
     def print(self):
         print(f'Complexity: {self.result}%')
-
-import detecto
-
-model.predict_top()

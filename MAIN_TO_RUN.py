@@ -195,7 +195,6 @@ if __name__ == '__main__':
     arch_name=args.cnn.lower()
     metric_names=[el.lower() for el in args.metrics]
     cam_extractors=[el.lower() for el in args.attr_methods]
-    print(cam_extractors)
 
     if res_path[-1] is not '/':
         res_path=res_path+'/'

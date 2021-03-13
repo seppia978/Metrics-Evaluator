@@ -38,6 +38,9 @@ class Deletion(EVMET.MetricOnSingleExample):
         self.result=round(SKM.auc(torch.arange(0, 1, self.st).numpy(),
                       torch.tensor(self.res_list).numpy()), 3)
 
+    def print(self,img):
+        print(f'Deletion for image {img}: {self.result}')
+
 class Insertion(EVMET.MetricOnSingleExample):
     def __init__(self,name,arch,result=0.,st=0.01):
         super().__init__(name,result,[])
@@ -71,6 +74,8 @@ class Insertion(EVMET.MetricOnSingleExample):
         self.result=SKM.auc(torch.arange(0, 1, self.st).numpy(),
                       torch.tensor(self.res_list).numpy())
 
+    def print(self,img):
+        print(f'Insertion for image {img}: {self.result}')
 
 
 def remove_more_important_px(img,exp_map,step=0.01):
